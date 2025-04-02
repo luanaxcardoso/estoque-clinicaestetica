@@ -22,7 +22,7 @@
     pip install -r requirements.txt
     ```
 4. Configure o banco de dados MySQL:
-5. Crie um banco de dados chamado `estoque_clinica` e as tabelas necessárias.
+5. Crie um banco de dados e as tabelas necessárias.
 
 ----------------------------------------------------------------------------
 
