@@ -15,14 +15,13 @@ class Database:
     def __enter__(self):
         self.conectar()
         return self
-
+    
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.desconectar()
         if exc_type:
             print(f"Erro: {exc_val}")
             return False
         return True
-    
         
     def conectar(self):
         """Estabelece conexão com o banco MySQL"""
