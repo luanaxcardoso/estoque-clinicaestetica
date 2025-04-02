@@ -18,6 +18,11 @@ conda activate clinica-estetica
 Para rodar o projeto
 
 ```bash
-python -m app.main
+python run.py
 
+```
+Criei um arquivo seed.py para popular o banco de dados com dados iniciais de categoria. Para rodar, execute o seguinte comando:
+
+```bash
+python seed.py
 ```
