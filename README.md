@@ -22,7 +22,7 @@
     pip install -r requirements.txt
     ```
 4. Configure o banco de dados MySQL:
-5. Crie um banco de dados e as tabelas necessárias.
+5. Crie o banco de dados e as tabelas necessárias.
 
 ----------------------------------------------------------------------------
 
@@ -37,7 +37,8 @@ Sistema para gestão de estoque de uma clínica estética, utilizando Python e M
 
 - **Gestão de Categorias**
   - Cadastro flexível
-  - Hierarquia de produtos
+  - Listagem de categorias
+  - Hierarquia de produtos dentro de categorias
 
 - **Gestão de Usuários**
   - Cadastro de usuários
@@ -58,5 +59,5 @@ Sistema para gestão de estoque de uma clínica estética, utilizando Python e M
 ## 📂 Principais características:
 - **Navegação intuitiva** 
 - **Controle de fluxo** 
-- **Feedback visual** 
-- **Organização modular** por funcionalidades
+- **Feedback visual no terminal** 
+- **Organização modular por funcionalidades**
