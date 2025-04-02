@@ -6,7 +6,6 @@ load_dotenv()
 
 class Database:
     def __init__(self):
-        
         self._host = os.getenv("DB_HOST")  
         self._user = os.getenv("DB_USER")
         self._password = os.getenv("DB_PASSWORD")
@@ -21,8 +20,7 @@ class Database:
                 password=self._password,
                 database=self._database
             )
-            print("Conexão feita com sucesso!")
             return conn
         except mysql.connector.Error as err:
-            print(f" Erro na conexão: {err}")
+            print(f"Erro na conexão: {err}")
             return None
