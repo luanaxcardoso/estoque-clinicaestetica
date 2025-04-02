@@ -35,11 +35,11 @@ Sistema para gestão de estoque de uma clínica estética, utilizando Python e M
   - Associação a categorias
   - Busca e listagem
 
-- ** Gestão de Categorias**
+- **Gestão de Categorias**
   - Cadastro flexível
   - Hierarquia de produtos
 
-- ** Gestão de Usuários**
+- **Gestão de Usuários**
   - Cadastro de usuários
   - Listagem de usuários
 
