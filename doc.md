@@ -1,6 +1,6 @@
 Instalar as dependencias
 
-Para gerar o arquivo requirements.txt depois de instalar as dependencias novas
+Para atualizar o arquivo requirements.txt depois de instalar uma nova dependência
 ```bash
 pip freeze > requirements.txt 
 ```

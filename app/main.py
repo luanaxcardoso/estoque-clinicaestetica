@@ -4,10 +4,10 @@ sys.path.append(str(Path(__file__).parent.parent))
 
 from app.models.produto import Produto
 from app.models.categoria import Categoria
+from app.models.usuario import Usuario
 from app.database import Database
 
 def testar_conexao():
-    
     db = Database()
     if db.conectar():
         print("Conexão bem-sucedida!")
@@ -37,7 +37,6 @@ def listar_categorias():
         print("Nenhuma categoria cadastrada")
 
 def cadastrar_produto():
-    """Cadastra um novo produto no sistema"""
     print("\n=== CADASTRO DE PRODUTO ===")
     listar_categorias()  
     
@@ -45,7 +44,7 @@ def cadastrar_produto():
         dados = {
             'nome': input("Nome: "),
             'descricao': input("Descrição: "),
-            'categoria_id': int(input("ID da Categoria (numérico): ")),
+            'categoria_id': int(input("ID da Categoria: ")),
             'quantidade': int(input("Quantidade Inicial: "))
         }
         
@@ -55,10 +54,9 @@ def cadastrar_produto():
         else:
             print("Falha ao cadastrar produto")
     except ValueError:
-        print("Erro: Digite um número válido para ID e Quantidade")
+        print("Erro: Digite números válidos para ID e Quantidade")
 
 def listar_produtos():
-    """Exibe todos os produtos cadastrados"""
     print("\n=== LISTA DE PRODUTOS ===")
     if produtos := Produto.listar_todos():
         for p in produtos:
@@ -67,18 +65,106 @@ ID: {p['id_produto']}
 Nome: {p['nome']}
 Descrição: {p['descricao']}
 Categoria: {p['categoria_nome']}
-Estoque: {p['quantidade']}
-Cadastrado em: {p['data_cadastro']}""")
+Estoque: {p['quantidade']}""")
     else:
         print("Nenhum produto cadastrado")
 
+
+def cadastrar_usuario():
+    print("\n=== CADASTRO DE USUÁRIO ===")
+    
+    try:
+        
+        dados = {
+            'nome': input("Nome: "),
+            'email': input("Email: "),
+            'senha': input("Senha: "),
+            'status': 'S'
+        }
+     
+        
+        niveis = {
+            '1': 'administrador',
+            '2': 'gerente',
+            '3': 'biomedico',
+            '4': 'esteticista',
+            '5': 'recepcionista'
+        }
+        
+        print("\nNíveis de acesso disponíveis:")
+        print("1 - Administrador")
+        print("2 - Gerente")
+        print("3 - Biomédico")
+        print("4 - Esteticista")
+        print("5 - Recepcionista")
+        
+        while True:
+            opcao = input("Escolha o nível de acesso: ")
+            if opcao in niveis:
+                dados['nivel_de_acesso'] = niveis[opcao]
+                break
+            else:
+                print("Opção inválida! Digite um número entre 1 e 5.")
+        
+        
+        usuario = Usuario(**dados)
+        if usuario_id := usuario.salvar():
+            print("\n====================================")
+            print("✅ USUÁRIO CADASTRADO COM SUCESSO!")
+            print("====================================")
+            print(f"ID: {usuario_id}")
+            print(f"Nome: {dados['nome']}")
+            print(f"Email: {dados['email']}")
+            print(f"Nível de acesso: {dados['nivel_de_acesso'].capitalize()}")
+            print("====================================")
+        else:
+            print("Falha ao cadastrar usuário")
+            
+    except Exception as e:
+        print(f"\nErro: {str(e)}")
+        
+
+def listar_usuarios():
+    print("\n=== LISTA DE USUÁRIOS ===")
+    if usuarios := Usuario.listar_todos():
+        for u in usuarios:
+            print(f"""
+ID: {u['id_usuario']}
+Nome: {u['nome']}
+Email: {u['email']}
+Nível de Acesso: {u['nivel_de_acesso'].capitalize()}""")
+    else:
+        print("Nenhum usuário cadastrado ou erro ao carregar a lista")
+
+def menu_principal():
+    """Menu principal simplificado"""
+    while True:
+        print("\n=== MENU PRINCIPAL ===")
+        print("1. Gerenciar Produtos")
+        print("2. Gerenciar Categorias")
+        print("3. Gerenciar Usuários")
+        print("4. Sair")
+        
+        opcao = input("Opção: ")
+        
+        if opcao == "1":
+            menu_produtos()
+        elif opcao == "2":
+            menu_categorias()
+        elif opcao == "3":
+            menu_usuarios()
+        elif opcao == "4":
+            print("Saindo do sistema...")
+            break
+        else:
+            print("Opção inválida!")
+
 def menu_produtos():
-    """Menu de operações com produtos"""
     while True:
         print("\n=== MENU PRODUTOS ===")
-        print("1. Cadastrar novo produto")
+        print("1. Cadastrar produto")
         print("2. Listar produtos")
-        print("3. Voltar ao menu principal")
+        print("3. Voltar")
         
         opcao = input("Opção: ")
         
@@ -89,16 +175,14 @@ def menu_produtos():
         elif opcao == "3":
             break
         else:
-            print("Opção inválida!")
-
+            print("Opção inválida")
 
 def menu_categorias():
-    """Menu de operações com categorias"""
     while True:
         print("\n=== MENU CATEGORIAS ===")
-        print("1. Cadastrar nova categoria")
+        print("1. Cadastrar categoria")
         print("2. Listar categorias")
-        print("3. Voltar ao menu principal")
+        print("3. Voltar")
         
         opcao = input("Opção: ")
         
@@ -109,28 +193,25 @@ def menu_categorias():
         elif opcao == "3":
             break
         else:
-            print("Opção inválida!")
+            print("Opção inválida")
 
-
-def menu_principal():
-    """Menu principal do sistema"""
+def menu_usuarios():
     while True:
-        print("\n=== SISTEMA DE ESTOQUE ===")
-        print("1. Gerenciar Produtos")
-        print("2. Gerenciar Categorias")
-        print("3. Sair")
+        print("\n=== MENU USUÁRIOS ===")
+        print("1. Cadastrar usuário")
+        print("2. Listar usuários")
+        print("3. Voltar")
         
         opcao = input("Opção: ")
         
         if opcao == "1":
-            menu_produtos()
+            cadastrar_usuario()
         elif opcao == "2":
-            menu_categorias()
+            listar_usuarios()
         elif opcao == "3":
-            print("Saindo do sistema...")
             break
         else:
-            print("Opção inválida!")
+            print("Opção inválida")
 
 if __name__ == "__main__":
     if testar_conexao():
