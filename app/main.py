@@ -1,3 +1,4 @@
+from datetime import datetime
 import sys
 from pathlib import Path
 sys.path.append(str(Path(__file__).parent.parent))
@@ -38,7 +39,7 @@ def listar_categorias():
         print("Nenhuma categoria cadastrada")
 
 def cadastrar_produto():
-    print("\n=== CADASTRO DE PRODUTO ===")
+    print("\n=== 🔸  CADASTRO DE PRODUTO  🔸 ===")
     listar_categorias()  
     print("=======================================================")
     print("📌 Escolha uma categoria acima para cadastrar o produto")
@@ -56,7 +57,7 @@ def cadastrar_produto():
         produto = Produto(**dados)
         if produto_id := produto.salvar():
             print("\n=======================================")
-            print("✅ PRODUTO CADASTRADO COM SUCESSO!")
+            print(" 🔸  PRODUTO CADASTRADO COM SUCESSO! 🔸  ")
             print("=======================================")
             print(f"ID: {produto_id}")
             print(f"Nome: {dados['nome']}")
@@ -74,7 +75,7 @@ def cadastrar_produto():
         print("- Valor Unitário é um número decimal válido")
 
 def listar_produtos():
-    print("\n=== LISTA DE PRODUTOS ===")
+    print("\n=== 🔸  LISTA DE PRODUTOS  🔸 ===")
     if produtos := Produto.listar_todos():
         for p in produtos:
             print(f"""
@@ -153,97 +154,258 @@ Nível de Acesso: {u['nivel_de_acesso'].capitalize()}
     else:
         print("Nenhum usuário cadastrado")
         input("Pressione Enter para voltar...")
+        
 
 def registrar_movimentacao(tipo: str):
     tipo_nome = "ENTRADA" if tipo == "entrada" else "SAÍDA"
-    print(f"\n=== REGISTRAR {tipo_nome} DE ESTOQUE ===")
     
-    listar_produtos()
-    
-    try:
-        id_produto = int(input("\nID do Produto: "))
-        quantidade = int(input("Quantidade: "))
-        motivo = input("Motivo: ")
+    while True:  
+        print("\n" + "="*50)
+        print(f"📝 REGISTRAR {tipo_nome} DE ESTOQUE".center(50))
+        print("="*50)
         
-        print("\nUsuários disponíveis:")
-        listar_usuarios()
-        id_usuario = int(input("\nID do Usuário responsável: "))
-        
-        mov = Movimentacao(
-            tipo=tipo,
-            quantidade=quantidade,
-            motivo=motivo,
-            id_usuario=id_usuario,
-            id_produto=id_produto
-        )
-        
-        if id_movimentacao := mov.salvar():
-            print(f"\n✅ Movimentação registrada com ID: {id_movimentacao}")
-            print(f"Tipo: {tipo_nome}")
-            print(f"Quantidade: {quantidade}")
-            print(f"Produto ID: {id_produto}")
-        else:
-            print("\n Falha ao registrar movimentação")
+       
+        print("\n📦 LISTA DE PRODUTOS DISPONÍVEIS:")
+        produtos = Produto.listar_todos()
+        if not produtos:
+            print(" Nenhum produto cadastrado!")
+            input("\nPressione Enter para voltar...")
+            return
             
-    except ValueError as ve:
-        print(f"\n Erro: {str(ve)}")
+        for prod in produtos:
+            print(f"\nID: {prod['id_produto']}")
+            print(f"Nome: {prod['nome']}")
+            print(f"Estoque: {prod['quantidade']}")
+            print(f"Categoria: {prod.get('categoria_nome', 'N/A')}")
+            print("-"*40)
+        
+        try:
+            id_produto = int(input("\n▶ ID do Produto (0 para cancelar): "))
+            if id_produto == 0:
+                return
+                
+            produto = Produto.obter_por_id(id_produto)
+            if not produto:
+                print(" Produto não encontrado!")
+                continue
+                
+            print("\n" + "="*50)
+            print(f"🔍 PRODUTO SELECIONADO:")
+            print(f"▪ Nome: {produto['nome']}")
+            print(f"▪ Estoque Atual: {produto['quantidade']}")
+            print(f"▪ Categoria: {produto.get('categoria_nome', 'N/A')}")
+            print("="*50)
+            
+            while True:
+                try:
+                    quantidade = int(input("\n▶ Quantidade: "))
+                    if quantidade <= 0:
+                        print("⚠️ A quantidade deve ser maior que zero!")
+                        continue
+                        
+                    if tipo == 'saida' and produto['quantidade'] < quantidade:
+                        print(f" Estoque insuficiente! Disponível: {produto['quantidade']}")
+                        continue
+                    break
+                except ValueError:
+                    print("⚠️ Digite um número válido!")
+            
+            if tipo == 'saida':
+                print("\n" + "="*50)
+                print(f"⚠️ CONFIRMAÇÃO DE SAÍDA")
+                print(f"▪ Produto: {produto['nome']}")
+                print(f"▪ Quantidade: {quantidade}")
+                print(f"▪ Estoque após saída: {produto['quantidade'] - quantidade}")
+                print("="*50)
+                
+                confirmacao = input("\n▶ Confirmar saída? (S/N): ").strip().upper()
+                if confirmacao != 'S':
+                    print("Operação cancelada!")
+                    continue
+            
+            print("\n" + "="*50)
+            print("👤 SELECIONE O USUÁRIO RESPONSÁVEL:")
+            usuarios = Usuario.listar_todos()
+            if not usuarios:
+                print(" Nenhum usuário cadastrado!")
+                input("\nPressione Enter para voltar...")
+                return
+                
+            for user in usuarios:
+                print(f"\nID: {user['id_usuario']}")
+                print(f"Nome: {user['nome']}")
+                print(f"Nível: {user['nivel_de_acesso'].capitalize()}")
+                print("-"*40)
+            
+            while True:
+                try:
+                    id_usuario = int(input("\n▶ ID do Responsável: "))
+                    usuario = next((u for u in usuarios if u['id_usuario'] == id_usuario), None)
+                    if usuario:
+                        break
+                    print(" Usuário não encontrado!")
+                except ValueError:
+                    print(" Digite um número válido!")
+            
+            motivo = input("\n▶ Motivo: ").strip()
+            
+            
+            print("\n" + "="*50)
+            print(" RESUMO DA MOVIMENTAÇÃO")
+            print(f"▪ Tipo: {tipo_nome}")
+            print(f"▪ Produto: {produto['nome']} (ID: {id_produto})")
+            print(f"▪ Quantidade: {quantidade}")
+            print(f"▪ Responsável: {usuario['nome']} (ID: {id_usuario})")
+            print(f"▪ Motivo: {motivo}")
+            print("="*50)
+            
+            confirmacao_final = input("\n▶ Confirmar registro? (S/N): ").strip().upper()
+            if confirmacao_final != 'S':
+                print("Operação cancelada!")
+                continue
+            
+           
+            mov = Movimentacao(
+                tipo=tipo,
+                quantidade=quantidade,
+                motivo=motivo,
+                id_usuario=id_usuario,
+                id_produto=id_produto
+            )
+            
+            if id_movimentacao := mov.salvar():
+                produto_atualizado = Produto.obter_por_id(id_produto)
+                
+                print("\n" + "="*50)
+                print(f"✅ {tipo_nome} REGISTRADA COM SUCESSO!")
+                print("="*50)
+                print(f"▪ ID Movimentação: {id_movimentacao}")
+                print(f"▪ Produto: {produto['nome']}")
+                print(f"▪ Quantidade: {quantidade}")
+                print(f"▪ Estoque Atualizado: {produto_atualizado['quantidade']}")
+                print(f"▪ Responsável: {usuario['nome']}")
+                print(f"▪ Data/Hora: {datetime.now().strftime('%d/%m/%Y %H:%M')}")
+                print("="*50)
+                
+                
+                if input("\n▶ Registrar outra movimentação? (S/N): ").strip().upper() != 'S':
+                    break
+            else:
+                print(" Falha ao registrar movimentação!")
+                
+        except Exception as e:
+            print(f" Erro inesperado: {str(e)}")
+            continue
+        
+    input("\nPressione Enter para voltar ao menu...")
+
+
+
 
 def listar_movimentacoes():
-    print("\n=== HISTÓRICO DE MOVIMENTAÇÕES ===")
-    print("\nOpções de filtro:")
-    print("1. Listar todas as movimentações")
-    print("2. Listar por produto específico")
-    print("3. Voltar")
-    
-    opcao = input("Opção: ")
-    
-    if opcao == "1":
-        movimentacoes = Movimentacao.listar_todas()
-    elif opcao == "2":
-        listar_produtos()
-        id_produto = input("\nID do Produto (ou deixe em branco para cancelar): ")
-        if id_produto:
-            movimentacoes = Movimentacao.listar_por_produto(int(id_produto))
-        else:
+    while True:  
+        print("\n" + "="*50)
+        print(" HISTÓRICO DE MOVIMENTAÇÕES".center(50))
+        print("="*50)
+        print("\nOpções de filtro:")
+        print("1. Listar todas as movimentações")
+        print("2. Listar por produto específico")
+        print("3. Voltar ao menu anterior")
+        
+        opcao = input("\nOpção: ").strip()
+        
+        if opcao == "1":
+            movimentacoes = Movimentacao.listar_todas()
+            titulo = "TODAS AS MOVIMENTAÇÕES"
+        elif opcao == "2":
+            listar_produtos()
+            id_produto = input("\nID do Produto (ou deixe em branco para voltar): ").strip()
+            if not id_produto:
+                continue
+            try:
+                movimentacoes = Movimentacao.listar_por_produto(int(id_produto))
+                produto = Produto.obter_por_id(int(id_produto))
+                titulo = f"MOVIMENTAÇÕES DO PRODUTO: {produto['nome']}" if produto else "MOVIMENTAÇÕES DO PRODUTO"
+            except ValueError:
+                print(" ID deve ser um número inteiro!")
+                continue
+        elif opcao == "3":
             return
-    elif opcao == "3":
-        return
-    
-    if movimentacoes:
-        print("\n=== RESULTADOS ===")
-        for mov in movimentacoes:
-            print(f"""
-ID Movimentação: {mov['id_movimentacao']}
-Data: {mov['data_movimentacao'].strftime('%d/%m/%Y %H:%M')}
-Tipo: {'Entrada' if mov['tipo'] == 'entrada' else 'Saída'}
-Produto: {mov['produto_nome']} (ID: {mov['produtos_id_produto']})
-Quantidade: {mov['quantidade']}
-Motivo: {mov['motivo']}
-Registrado por: {mov['usuario_nome']} (ID: {mov['usuarios_id_usuario']})
----------------------------------------""")
-        input("\nPressione Enter para voltar...")
-    else:
-        print("Nenhuma movimentação encontrada")
-        input("Pressione Enter para voltar...")
+        else:
+            print(" Opção inválida!")
+            continue
+        
+        if movimentacoes:
+            print("\n" + "="*50)
+            print(f" {titulo}".center(50))
+            print("="*50)
+            
+          
+            print(f"\n{'ID':<5} {'Data/Hora':<16} {'Tipo':<8} {'Produto':<20} {'Qtd':<6} {'Responsável':<20} {'Motivo'}")
+            print("-"*90)
+            
+            for mov in movimentacoes:
+                print(f"{mov['id_movimentacao']:<5} "
+                      f"{mov['data_movimentacao'].strftime('%d/%m/%Y %H:%M'):<16} "
+                      f"{'▲' if mov['tipo'] == 'entrada' else '▼':<8} "
+                      f"{mov['produto_nome'][:18]:<20} "
+                      f"{mov['quantidade']:<6} "
+                      f"{mov['usuario_nome'][:18]:<20} "
+                      f"{mov['motivo'][:20]}")
+            
+       
+            entradas = sum(m['quantidade'] for m in movimentacoes if m['tipo'] == 'entrada')
+            saidas = sum(m['quantidade'] for m in movimentacoes if m['tipo'] == 'saida')
+            
+            print("\n" + "="*50)
+            print(f"📌 RESUMO ESTATÍSTICO".center(50))
+            print(f"Total de entradas: {entradas} unidades")
+            print(f"Total de saídas: {saidas} unidades")
+            print(f"Saldo: {entradas - saidas} unidades")
+            print("="*50)
+        else:
+            print("\n Nenhuma movimentação encontrada com os filtros selecionados")
+        
+        input("\nPressione Enter para continuar...")
+        
 
 def ajustar_estoque():
     print("\n=== AJUSTE DE ESTOQUE ===")
     listar_produtos()
     
     try:
+      
         id_produto = int(input("\nID do Produto: "))
+        produto = Produto.obter_por_id(id_produto)
+        if not produto:
+            print("Produto não encontrado!")
+            return
+            
+        print(f"\n🔎 Produto Selecionado: {produto['nome']}")
+        print(f"   Estoque Atual: {produto['quantidade']}")
+        
+        
         nova_quantidade = int(input("Nova quantidade em estoque: "))
         motivo = input("Motivo do ajuste: ")
         
-        print("\nUsuários disponíveis:")
-        listar_usuarios()
-        id_usuario = int(input("\nID do Usuário responsável: "))
-        
-        produto = Produto.obter_por_id(id_produto)
-        if not produto:
-            print(" Produto não encontrado")
+     
+        print("\n=== USUÁRIOS DISPONÍVEIS ===")
+        usuarios = Usuario.listar_todos()
+        if not usuarios:
+            print(" Nenhum usuário cadastrado!")
             return
             
+        for user in usuarios:
+            print(f"ID: {user['id_usuario']} | Nome: {user['nome']} | Nível: {user['nivel_de_acesso']}")
+        
+        id_usuario = int(input("\nID do Usuário Responsável: "))
+        
+        
+        usuario_responsavel = next((u for u in usuarios if u['id_usuario'] == id_usuario), None)
+        if not usuario_responsavel:
+            print(" Usuário não encontrado!")
+            return
+        
         diferenca = nova_quantidade - produto['quantidade']
         
         if diferenca == 0:
@@ -251,30 +413,62 @@ def ajustar_estoque():
             return
             
         tipo = 'entrada' if diferenca > 0 else 'saida'
+        quantidade_ajuste = abs(diferenca)
+        
+       
+        print(f"\n CONFIRMAR AJUSTE:")
+        print(f"Produto: {produto['nome']} (ID: {id_produto})")
+        print(f"Tipo: {'Entrada' if tipo == 'entrada' else 'Saída'}")
+        print(f"Quantidade: {quantidade_ajuste}")
+        print(f"Estoque anterior: {produto['quantidade']}")
+        print(f"Novo estoque: {nova_quantidade}")
+        print(f"Responsável: {usuario_responsavel['nome']} (ID: {id_usuario})")
+        print(f"Motivo: {motivo}")
+        
+        confirmacao = input("\nConfirmar ajuste? (S/N): ").strip().upper()
+        if confirmacao != 'S':
+            print("Operação cancelada!")
+            return
+        
         
         mov = Movimentacao(
             tipo=tipo,
-            quantidade=abs(diferenca),
+            quantidade=quantidade_ajuste,
             motivo=motivo,
             id_usuario=id_usuario,
             id_produto=id_produto
         )
         
-        if mov.salvar():
-            print("\n✅ Estoque atualizado e movimentação registrada com sucesso!")
-            print(f"Produto: {produto['nome']}")
-            print(f"Estoque anterior: {produto['quantidade']}")
-            print(f"Novo estoque: {nova_quantidade}")
-            print(f"Diferença: {'+' if diferenca > 0 else ''}{diferenca}")
-        else:
-            print("\n Falha ao atualizar estoque")
+        if id_movimentacao := mov.salvar():
+            produto_atualizado = Produto.obter_por_id(id_produto)
             
-    except ValueError as ve:
-        print(f"\n Erro: {str(ve)}")
+            print("\n" + "="*50)
+            print("✅ AJUSTE DE ESTOQUE REGISTRADO COM SUCESSO")
+            print("="*50)
+            print(f"▪ ID Movimentação: {id_movimentacao}")
+            print(f"▪ Produto: {produto['nome']} (ID: {id_produto})")
+            print(f"▪ Tipo: {'Entrada' if tipo == 'entrada' else 'Saída'}")
+            print(f"▪ Quantidade Ajustada: {quantidade_ajuste}")
+            print(f"▪ Estoque Anterior: {produto['quantidade']}")
+            print(f"▪ Novo Estoque: {produto_atualizado['quantidade']}")
+            print(f"▪ Responsável: {usuario_responsavel['nome']} (ID: {id_usuario})")
+            print(f"▪ Motivo: {motivo}")
+            print(f"▪ Data/Hora: {datetime.now().strftime('%d/%m/%Y %H:%M')}")
+            print("="*50)
+        else:
+            print(" Falha ao registrar ajuste de estoque!")
+            
+    except ValueError:
+        print(" Erro: Valor inválido! Certifique-se de digitar números para ID e quantidade.")
+    except Exception as e:
+        print(f" Erro inesperado: {str(e)}")
+    finally:
+        input("\nPressione Enter para continuar...")
+        
 
 def menu_produtos():
     while True:
-        print("\n MENU PRODUTOS")
+        print("\n🔸 MENU PRODUTOS 🔸")
         print("1. Cadastrar produto")
         print("2. Listar produtos")
         print("3. Registrar entrada de estoque")
@@ -304,7 +498,7 @@ def menu_produtos():
 
 def menu_categorias():
     while True:
-        print("\n MENU CATEGORIAS")
+        print("\n🔸 MENU CATEGORIAS 🔸")
         print("1. Cadastrar categoria")
         print("2. Listar categorias")
         print("3. Voltar")
@@ -319,10 +513,11 @@ def menu_categorias():
             break
         else:
             print(" Opção inválida!")
+            
 
 def menu_usuarios():
     while True:
-        print("\n MENU USUÁRIOS")
+        print("\n🔸 MENU USUÁRIOS 🔸")
         print("1. Cadastrar usuário")
         print("2. Listar usuários")
         print("3. Voltar")
@@ -340,7 +535,7 @@ def menu_usuarios():
 
 def menu_movimentacoes():
     while True:
-        print("\n MENU MOVIMENTAÇÕES")
+        print("\n🔸 MENU MOVIMENTAÇÕES 🔸")
         print("1. Registrar entrada de estoque")
         print("2. Registrar saída de estoque")
         print("3. Ajustar estoque manualmente")
@@ -380,7 +575,7 @@ def menu_movimentacoes():
 
 def menu_principal():
     while True:
-        print("\n🏠 MENU PRINCIPAL")
+        print("\n🔸 MENU PRINCIPAL 🔸 ")
         print("1. Gerenciar Produtos")
         print("2. Gerenciar Categorias")
         print("3. Gerenciar Usuários")

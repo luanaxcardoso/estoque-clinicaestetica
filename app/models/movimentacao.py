@@ -104,17 +104,17 @@ class Movimentacao:
                 return None
             finally:
                 cursor.close()
-    
+
     @classmethod
     def listar_todas(cls) -> List[Dict]:
-        
-        with Database() as db:
-            if not db.connection or not db.connection.is_connected():
-                return []
-                
-            cursor = db.connection.cursor(dictionary=True)
-            try:
-                cursor.execute("""
+            """Lista todas as movimentações com informações completas"""
+            with Database() as db:
+                if not db.connection or not db.connection.is_connected():
+                    return []
+                    
+                cursor = db.connection.cursor(dictionary=True)
+                try:
+                    query = """
                     SELECT 
                         m.id_movimentacao,
                         m.tipo,
@@ -122,82 +122,87 @@ class Movimentacao:
                         m.motivo,
                         m.data_movimentacao,
                         m.usuarios_id_usuario,
-                        m.produtos_id_produto,
                         u.nome as usuario_nome,
-                        p.nome as produto_nome
+                        m.produtos_id_produto,
+                        p.nome as produto_nome,
+                        c.nome as categoria_nome
                     FROM movimentacao m
                     JOIN usuarios u ON m.usuarios_id_usuario = u.id_usuario
                     JOIN produtos p ON m.produtos_id_produto = p.id_produto
+                    JOIN categorias c ON p.categorias_id_categoria = c.id_categoria
                     ORDER BY m.data_movimentacao DESC
-                """)
-                return cursor.fetchall()
-            except mysql.connector.Error as err:
-                print(f"Erro ao listar movimentações: {err}")
-                return []
-            finally:
-                cursor.close()
+                    """
+                    cursor.execute(query)
+                    return cursor.fetchall()
+                except Exception as e:
+                    print(f"Erro ao listar movimentações: {str(e)}")
+                    return []
+                finally:
+                    cursor.close()
+
 
     @classmethod
     def listar_por_produto(cls, id_produto: int) -> List[Dict]:
-        """Lista todas as movimentações de um produto específico"""
+        """Lista movimentações de um produto específico com informações completas"""
         with Database() as db:
             if not db.connection or not db.connection.is_connected():
                 return []
                 
             cursor = db.connection.cursor(dictionary=True)
             try:
-                cursor.execute("""
-                    SELECT 
-                        m.id_movimentacao,
-                        m.tipo,
-                        m.quantidade,
-                        m.motivo,
-                        m.data_movimentacao,
-                        u.id_usuario,
-                        u.nome as usuario_nome,
-                        p.id_produto,
-                        p.nome as produto_nome 
-                    FROM movimentacao m
-                    JOIN usuarios u ON m.usuarios_id_usuario = u.id_usuario
-                    JOIN produtos p ON m.produtos_id_produto = p.id_produto
-                    WHERE m.produtos_id_produto = %s
-                    ORDER BY m.data_movimentacao DESC
-                """, (id_produto,))
+                query = """
+                SELECT 
+                    m.id_movimentacao,
+                    m.tipo,
+                    m.quantidade,
+                    m.motivo,
+                    m.data_movimentacao,
+                    m.usuarios_id_usuario,
+                    u.nome as usuario_nome,
+                    m.produtos_id_produto,
+                    p.nome as produto_nome
+                FROM movimentacao m
+                JOIN usuarios u ON m.usuarios_id_usuario = u.id_usuario
+                JOIN produtos p ON m.produtos_id_produto = p.id_produto
+                WHERE m.produtos_id_produto = %s
+                ORDER BY m.data_movimentacao DESC
+                """
+                cursor.execute(query, (id_produto,))
                 return cursor.fetchall()
-            except mysql.connector.Error as err:
-                print(f"Erro ao listar movimentações por produto: {err}")
+            except Exception as e:
+                print(f"Erro ao listar movimentações por produto: {str(e)}")
                 return []
             finally:
                 cursor.close()
 
     @classmethod
     def obter_por_id(cls, id_movimentacao: int) -> Optional[Dict]:
-        """Obtém uma movimentação específica pelo seu ID"""
-        with Database() as db:
-            if not db.connection or not db.connection.is_connected():
-                return None
-                
-            cursor = db.connection.cursor(dictionary=True)
-            try:
-                cursor.execute("""
-                    SELECT 
-                        m.id_movimentacao,
+            """Obtém uma movimentação específica pelo ID"""
+            with Database() as db:
+                if not db.connection or not db.connection.is_connected():
+                    return None
+                    
+                cursor = db.connection.cursor(dictionary=True)
+                try:
+                    cursor.execute("""
+                        SELECT 
+                            m.id_movimentacao,
                         m.tipo,
                         m.quantidade,
                         m.motivo,
                         m.data_movimentacao,
-                        u.id_usuario,
+                        m.usuarios_id_usuario,  
+                        m.produtos_id_produto,   
                         u.nome as usuario_nome,
-                        p.id_produto,
-                        p.nome as produto_nome 
-                    FROM movimentacao m
-                    JOIN usuarios u ON m.usuarios_id_usuario = u.id_usuario
-                    JOIN produtos p ON m.produtos_id_produto = p.id_produto
-                    WHERE m.id_movimentacao = %s
-                """, (id_movimentacao,))
-                return cursor.fetchone()
-            except mysql.connector.Error as err:
-                print(f"Erro ao obter movimentação: {err}")
-                return None
-            finally:
-                cursor.close()
+                        p.nome as produto_nome
+                        FROM movimentacao m
+                        JOIN usuarios u ON m.usuarios_id_usuario = u.id_usuario
+                        JOIN produtos p ON m.produtos_id_produto = p.id_produto
+                        WHERE m.id_movimentacao = %s
+                    """, (id_movimentacao,))
+                    return cursor.fetchone()
+                except mysql.connector.Error as err:
+                    print(f"Erro ao obter movimentação: {err}")
+                    return None
+                finally:
+                    cursor.close()    
