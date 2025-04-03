@@ -5,11 +5,11 @@ from datetime import datetime
 
 class Movimentacao:
     def __init__(self, 
-                 tipo: Literal['entrada', 'saida'],
-                 quantidade: int,
-                 motivo: str,
-                 id_usuario: int,
-                 id_produto: int):
+                tipo: Literal['entrada', 'saida'],
+                quantidade: int,
+                motivo: str,
+                id_usuario: int,
+                id_produto: int):
         """
         Inicializa uma nova movimentação de estoque
         
@@ -48,20 +48,20 @@ class Movimentacao:
                 
                 
                 cursor.execute("SELECT id_usuario FROM usuarios WHERE id_usuario = %s", 
-                             (self.id_usuario,))
+                            (self.id_usuario,))
                 if not cursor.fetchone():
                     raise ValueError(f"Usuário com ID {self.id_usuario} não encontrado")
                 
                 
                 cursor.execute("SELECT id_produto FROM produtos WHERE id_produto = %s", 
-                             (self.id_produto,))
+                            (self.id_produto,))
                 if not cursor.fetchone():
                     raise ValueError(f"Produto com ID {self.id_produto} não encontrado")
                 
                 
                 if self.tipo == 'saida':
                     cursor.execute("SELECT quantidade FROM produtos WHERE id_produto = %s", 
-                                 (self.id_produto,))
+                                (self.id_produto,))
                     estoque_atual = cursor.fetchone()[0]
                     if estoque_atual < self.quantidade:
                         raise ValueError(f"Estoque insuficiente. Disponível: {estoque_atual}")
@@ -102,6 +102,38 @@ class Movimentacao:
                 print(f"Erro de validação: {ve}")
                 db.connection.rollback()
                 return None
+            finally:
+                cursor.close()
+    
+    @classmethod
+    def listar_todas(cls) -> List[Dict]:
+        
+        with Database() as db:
+            if not db.connection or not db.connection.is_connected():
+                return []
+                
+            cursor = db.connection.cursor(dictionary=True)
+            try:
+                cursor.execute("""
+                    SELECT 
+                        m.id_movimentacao,
+                        m.tipo,
+                        m.quantidade,
+                        m.motivo,
+                        m.data_movimentacao,
+                        m.usuarios_id_usuario,
+                        m.produtos_id_produto,
+                        u.nome as usuario_nome,
+                        p.nome as produto_nome
+                    FROM movimentacao m
+                    JOIN usuarios u ON m.usuarios_id_usuario = u.id_usuario
+                    JOIN produtos p ON m.produtos_id_produto = p.id_produto
+                    ORDER BY m.data_movimentacao DESC
+                """)
+                return cursor.fetchall()
+            except mysql.connector.Error as err:
+                print(f"Erro ao listar movimentações: {err}")
+                return []
             finally:
                 cursor.close()
 

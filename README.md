@@ -21,12 +21,11 @@
     ```bash 
     pip install -r requirements.txt
     ```
-4. Configure o banco de dados MySQL:
-5. Crie o banco de dados e as tabelas necessárias.
+4. Configure o banco de dados MySQL e crie as tabelas necessárias.
 
 ----------------------------------------------------------------------------
 
-Sistema para gestão de estoque de uma clínica estética, utilizando Python e MySQL. O sistema é projetado para facilitar o gerenciamento, permitindo o cadastro e listagem de produtos, categorias e usuarios.
+Sistema para gestão de estoque de uma clínica estética, utilizando Python e MySQL. O sistema é projetado para facilitar o gerenciamento, permitindo o cadastro e listagem de produtos, categorias,usuarios e movimentações de estoque.
 
 ## ✨ Funcionalidades
 
@@ -40,9 +39,15 @@ Sistema para gestão de estoque de uma clínica estética, utilizando Python e M
   - Listagem de categorias
   - Hierarquia de produtos dentro de categorias
 
+- **Gestão de Movimentação de Estoque**
+  - Cadastro de entradas/saídas
+  - Listagem de movimentações
+
+
 - **Gestão de Usuários**
   - Cadastro de usuários
   - Listagem de usuários
+
 
 ## 🛠️ Tecnologias
 

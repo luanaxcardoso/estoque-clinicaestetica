@@ -16,7 +16,6 @@ def testar_conexao():
     print("Falha na conexão")
     return False
 
-
 def cadastrar_categoria():
     print("\nCadastro de Categoria")
     nome = input("Nome da Categoria: ")
@@ -38,32 +37,41 @@ def listar_categorias():
     else:
         print("Nenhuma categoria cadastrada")
 
-
 def cadastrar_produto():
     print("\n=== CADASTRO DE PRODUTO ===")
     listar_categorias()  
     print("=======================================================")
-    print("📌Escolha uma categoria acima para cadastrar o produto")
+    print("📌 Escolha uma categoria acima para cadastrar o produto")
     print("=======================================================")
     
     try:
         dados = {
-            'categoria_id': int(input("ID da Categoria: ")),
-            'nome': input("Nome do produto: "),
-            'descricao': input("Descrição do produto: "),
-            'quantidade': int(input("Quantidade Inicial: "))
+            'categorias_id_categoria': int(input("ID da Categoria: ")),
+            'nome': input("Nome do produto: ").strip(),
+            'descricao': input("Descrição do produto: ").strip(),
+            'quantidade': max(0, int(input("Quantidade Inicial: "))),
+            'valor_unitario': max(0.0, float(input("Valor Unitário (R$): ")))
         }
         
         produto = Produto(**dados)
         if produto_id := produto.salvar():
+            print("\n=======================================")
+            print("✅ PRODUTO CADASTRADO COM SUCESSO!")
             print("=======================================")
-            print(f"Produto cadastrado com ID: {produto_id}")
-            print("========================================")
+            print(f"ID: {produto_id}")
+            print(f"Nome: {dados['nome']}")
+            print(f"Categoria ID: {dados['categorias_id_categoria']}")
+            print(f"Estoque: {dados['quantidade']}")
+            print(f"Valor Unitário: R$ {dados['valor_unitario']:.2f}")
+            print("=======================================")
         else:
-            print("Falha ao cadastrar produto")
-    except ValueError:
-        print("Erro: Digite números válidos para ID e Quantidade")
-
+            print("\n Falha ao cadastrar produto. Verifique os dados e tente novamente.")
+    except ValueError as e:
+        print(f"\n Erro: {str(e)}")
+        print("Certifique-se de que:")
+        print("- ID da Categoria é um número válido")
+        print("- Quantidade é um número inteiro positivo")
+        print("- Valor Unitário é um número decimal válido")
 
 def listar_produtos():
     print("\n=== LISTA DE PRODUTOS ===")
@@ -73,18 +81,20 @@ def listar_produtos():
 ID: {p['id_produto']}
 Nome: {p['nome']}
 Descrição: {p['descricao']}
-Categoria: {p['categoria_nome']}
-Estoque: {p['quantidade']}""")
+Categoria: {p['categoria_nome']} (ID: {p['categorias_id_categoria']})
+Estoque: {p['quantidade']}
+Valor Unitário: R$ {float(p.get('valor_unitario', 0)):.2f}
+Data Cadastro: {p.get('data_cadastro', '').strftime('%d/%m/%Y %H:%M') if p.get('data_cadastro') else 'N/A'}
+---------------------------------------""")
+        input("\nPressione Enter para voltar...")
     else:
-        print("Nenhum produto cadastrado")
-
-
+        print("\nNenhum produto cadastrado no sistema")
+        input("Pressione Enter para voltar...")
 
 def cadastrar_usuario():
     print("\n=== CADASTRO DE USUÁRIO ===")
     
     try:
-        
         dados = {
             'nome': input("Nome: "),
             'email': input("Email: "),
@@ -92,7 +102,6 @@ def cadastrar_usuario():
             'status': 'S'
         }
      
-        
         niveis = {
             '1': 'administrador',
             '2': 'gerente',
@@ -102,11 +111,8 @@ def cadastrar_usuario():
         }
         
         print("\nNíveis de acesso disponíveis:")
-        print("1 - Administrador")
-        print("2 - Gerente")
-        print("3 - Biomédico")
-        print("4 - Esteticista")
-        print("5 - Recepcionista")
+        for k, v in niveis.items():
+            print(f"{k} - {v.capitalize()}")
         print("========================")
         
         while True:
@@ -117,11 +123,10 @@ def cadastrar_usuario():
             else:
                 print("Opção inválida! Digite um número entre 1 e 5.")
         
-        
         usuario = Usuario(**dados)
         if usuario_id := usuario.salvar():
             print("\n====================================")
-            print("  USUÁRIO CADASTRADO COM SUCESSO!")
+            print("✅ USUÁRIO CADASTRADO COM SUCESSO!")
             print("====================================")
             print(f"ID: {usuario_id}")
             print(f"Nome: {dados['nome']}")
@@ -129,11 +134,10 @@ def cadastrar_usuario():
             print(f"Nível de acesso: {dados['nivel_de_acesso'].capitalize()}")
             print("====================================")
         else:
-            print("Falha ao cadastrar usuário")
+            print(" Falha ao cadastrar usuário")
             
     except Exception as e:
-        print(f"\nErro: {str(e)}")
-        
+        print(f"\n Erro: {str(e)}")
 
 def listar_usuarios():
     print("\n=== LISTA DE USUÁRIOS ===")
@@ -143,75 +147,16 @@ def listar_usuarios():
 ID: {u['id_usuario']}
 Nome: {u['nome']}
 Email: {u['email']}
-Nível de Acesso: {u['nivel_de_acesso'].capitalize()}""")
+Nível de Acesso: {u['nivel_de_acesso'].capitalize()}
+---------------------------------------""")
+        input("\nPressione Enter para voltar...")
     else:
-        print("Nenhum usuário cadastrado ou erro ao carregar a lista")
-
-
-def menu_principal():
-    
-    while True:
-        print("\n=== MENU PRINCIPAL ===")
-        print("1. Gerenciar Produtos")
-        print("2. Gerenciar Categorias")
-        print("3. Gerenciar Usuários")
-        print("4. Sair")
-        
-        opcao = input("Opção: ")
-        
-        if opcao == "1":
-            menu_produtos()
-        elif opcao == "2":
-            menu_categorias()
-        elif opcao == "3":
-            menu_usuarios()
-        elif opcao == "4":
-            print("Saindo do sistema...")
-            break
-        else:
-            print("Opção inválida!")
-
-def menu_produtos():
-    while True:
-        print("\n=== MENU PRODUTOS ===")
-        print("1. Cadastrar produto")
-        print("2. Listar produtos")
-        print("3. Voltar")
-        
-        opcao = input("Opção: ")
-        
-        if opcao == "1":
-            cadastrar_produto()
-        elif opcao == "2":
-            listar_produtos()
-        elif opcao == "3":
-            break
-        else:
-            print("Opção inválida")
-
-def menu_categorias():
-    while True:
-        print("\n=== MENU CATEGORIAS ===")
-        print("1. Cadastrar categoria")
-        print("2. Listar categorias")
-        print("3. Voltar")
-        
-        opcao = input("Opção: ")
-        
-        if opcao == "1":
-            cadastrar_categoria()
-        elif opcao == "2":
-            listar_categorias()
-        elif opcao == "3":
-            break
-        else:
-            print("Opção inválida")
+        print("Nenhum usuário cadastrado")
+        input("Pressione Enter para voltar...")
 
 def registrar_movimentacao(tipo: str):
-    """Registra entrada ou saída de estoque"""
     tipo_nome = "ENTRADA" if tipo == "entrada" else "SAÍDA"
     print(f"\n=== REGISTRAR {tipo_nome} DE ESTOQUE ===")
-    
     
     listar_produtos()
     
@@ -219,7 +164,6 @@ def registrar_movimentacao(tipo: str):
         id_produto = int(input("\nID do Produto: "))
         quantidade = int(input("Quantidade: "))
         motivo = input("Motivo: ")
-        
         
         print("\nUsuários disponíveis:")
         listar_usuarios()
@@ -234,7 +178,7 @@ def registrar_movimentacao(tipo: str):
         )
         
         if id_movimentacao := mov.salvar():
-            print(f"\n Movimentação registrada com ID: {id_movimentacao}")
+            print(f"\n✅ Movimentação registrada com ID: {id_movimentacao}")
             print(f"Tipo: {tipo_nome}")
             print(f"Quantidade: {quantidade}")
             print(f"Produto ID: {id_produto}")
@@ -242,12 +186,10 @@ def registrar_movimentacao(tipo: str):
             print("\n Falha ao registrar movimentação")
             
     except ValueError as ve:
-        print(f"\nErro: {str(ve)}")
+        print(f"\n Erro: {str(ve)}")
 
 def listar_movimentacoes():
-    """Lista todas as movimentações"""
     print("\n=== HISTÓRICO DE MOVIMENTAÇÕES ===")
-    
     print("\nOpções de filtro:")
     print("1. Listar todas as movimentações")
     print("2. Listar por produto específico")
@@ -266,9 +208,6 @@ def listar_movimentacoes():
             return
     elif opcao == "3":
         return
-    else:
-        print("Opção inválida")
-        return
     
     if movimentacoes:
         print("\n=== RESULTADOS ===")
@@ -280,12 +219,14 @@ Tipo: {'Entrada' if mov['tipo'] == 'entrada' else 'Saída'}
 Produto: {mov['produto_nome']} (ID: {mov['produtos_id_produto']})
 Quantidade: {mov['quantidade']}
 Motivo: {mov['motivo']}
-Registrado por: {mov['usuario_nome']} (ID: {mov['usuarios_id_usuario']})""")
+Registrado por: {mov['usuario_nome']} (ID: {mov['usuarios_id_usuario']})
+---------------------------------------""")
+        input("\nPressione Enter para voltar...")
     else:
         print("Nenhuma movimentação encontrada")
+        input("Pressione Enter para voltar...")
 
 def ajustar_estoque():
-    """Ajuste manual de estoque com registro de movimentação"""
     print("\n=== AJUSTE DE ESTOQUE ===")
     listar_produtos()
     
@@ -294,15 +235,13 @@ def ajustar_estoque():
         nova_quantidade = int(input("Nova quantidade em estoque: "))
         motivo = input("Motivo do ajuste: ")
         
-        
         print("\nUsuários disponíveis:")
         listar_usuarios()
         id_usuario = int(input("\nID do Usuário responsável: "))
         
-        
         produto = Produto.obter_por_id(id_produto)
         if not produto:
-            print("Produto não encontrado")
+            print(" Produto não encontrado")
             return
             
         diferenca = nova_quantidade - produto['quantidade']
@@ -322,7 +261,7 @@ def ajustar_estoque():
         )
         
         if mov.salvar():
-            print("\n Estoque atualizado e movimentação registrada com sucesso!")
+            print("\n✅ Estoque atualizado e movimentação registrada com sucesso!")
             print(f"Produto: {produto['nome']}")
             print(f"Estoque anterior: {produto['quantidade']}")
             print(f"Novo estoque: {nova_quantidade}")
@@ -331,12 +270,11 @@ def ajustar_estoque():
             print("\n Falha ao atualizar estoque")
             
     except ValueError as ve:
-        print(f"\nErro: {str(ve)}")
-
+        print(f"\n Erro: {str(ve)}")
 
 def menu_produtos():
     while True:
-        print("\n=== MENU PRODUTOS ===")
+        print("\n MENU PRODUTOS")
         print("1. Cadastrar produto")
         print("2. Listar produtos")
         print("3. Registrar entrada de estoque")
@@ -362,39 +300,47 @@ def menu_produtos():
         elif opcao == "7":
             break
         else:
-            print("Opção inválida")
+            print(" Opção inválida!")
 
-
-def menu_principal():
-    
+def menu_categorias():
     while True:
-        print("\n=== MENU PRINCIPAL ===")
-        print("1. Gerenciar Produtos")
-        print("2. Gerenciar Categorias")
-        print("3. Gerenciar Usuários")
-        print("4. Gerenciar Movimentações")
-        print("5. Sair")
+        print("\n MENU CATEGORIAS")
+        print("1. Cadastrar categoria")
+        print("2. Listar categorias")
+        print("3. Voltar")
         
         opcao = input("Opção: ")
         
         if opcao == "1":
-            menu_produtos()
+            cadastrar_categoria()
         elif opcao == "2":
-            menu_categorias()
+            listar_categorias()
         elif opcao == "3":
-            menu_usuarios()
-        elif opcao == "4":
-            menu_movimentacoes()
-        elif opcao == "5":
-            print("Saindo do sistema...")
             break
         else:
-            print("Opção inválida!")
+            print(" Opção inválida!")
 
+def menu_usuarios():
+    while True:
+        print("\n MENU USUÁRIOS")
+        print("1. Cadastrar usuário")
+        print("2. Listar usuários")
+        print("3. Voltar")
+        
+        opcao = input("Opção: ")
+        
+        if opcao == "1":
+            cadastrar_usuario()
+        elif opcao == "2":
+            listar_usuarios()
+        elif opcao == "3":
+            break
+        else:
+            print(" Opção inválida!")
 
 def menu_movimentacoes():
     while True:
-        print("\n=== MENU MOVIMENTAÇÕES ===")
+        print("\n MENU MOVIMENTAÇÕES")
         print("1. Registrar entrada de estoque")
         print("2. Registrar saída de estoque")
         print("3. Ajustar estoque manualmente")
@@ -430,26 +376,32 @@ def menu_movimentacoes():
         elif opcao == "6":
             break
         else:
-            print("Opção inválida")
+            print(" Opção inválida!")
 
-def menu_usuarios():
+def menu_principal():
     while True:
-        print("\n=== MENU USUÁRIOS ===")
-        print("1. Cadastrar usuário")
-        print("2. Listar usuários")
-        print("3. Voltar")
-        print("========================") 
+        print("\n🏠 MENU PRINCIPAL")
+        print("1. Gerenciar Produtos")
+        print("2. Gerenciar Categorias")
+        print("3. Gerenciar Usuários")
+        print("4. Gerenciar Movimentações")
+        print("5. Sair")
         
         opcao = input("Opção: ")
         
         if opcao == "1":
-            cadastrar_usuario()
+            menu_produtos()
         elif opcao == "2":
-            listar_usuarios()
+            menu_categorias()
         elif opcao == "3":
+            menu_usuarios()
+        elif opcao == "4":
+            menu_movimentacoes()
+        elif opcao == "5":
+            print("Saindo do sistema...")
             break
         else:
-            print("Opção inválida")
+            print(" Opção inválida!")
 
 if __name__ == "__main__":
     if testar_conexao():
