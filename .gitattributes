@@ -1,1 +1,2 @@
 *.sql linguagem=SQL
+sql/*.sql linguagem=SQL 
