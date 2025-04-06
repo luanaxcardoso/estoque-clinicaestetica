@@ -8,6 +8,9 @@ from app.models.categoria import Categoria
 from app.models.usuario import Usuario
 from app.models.movimentacao import Movimentacao
 from app.database import Database
+from colorama import init, Fore, Style
+
+init(autoreset=True)
 
 def testar_conexao():
     db = Database()
@@ -772,13 +775,13 @@ def ajustar_estoque():
 
 def menu_produtos():
     while True:
-        print("\n🔸 MENU PRODUTOS 🔸")
-        print("1. Cadastrar produto")
-        print("2. Listar produtos")
-        print("3. Alterar produto")
-        print("4. Deletar produto")
-        print("5. Voltar")
-        
+        print(f"\n{Fore.CYAN}{Style.BRIGHT}🔸 MENU PRODUTOS 🔸{Style.RESET_ALL}")
+        print(f"{Fore.YELLOW}1. {Fore.MAGENTA}Cadastrar produto")
+        print(f"{Fore.YELLOW}2. {Fore.MAGENTA}Listar produtos")
+        print(f"{Fore.YELLOW}3. {Fore.MAGENTA}Alterar produto")
+        print(f"{Fore.YELLOW}4. {Fore.MAGENTA}Deletar produto")
+        print(f"{Fore.RED}5. Voltar{Style.RESET_ALL}")
+
         opcao = input("Opção: ")
         
         if opcao == "1":
@@ -798,13 +801,13 @@ def menu_produtos():
 
 def menu_categorias():
     while True:
-        print("\n🔸 MENU CATEGORIAS 🔸")
-        print("1. Cadastrar categoria")
-        print("2. Listar categorias")
-        print("3. Alterar categoria")
-        print("4. Deletar categoria")
-        print("5. Voltar")
-        
+        print(f"\n{Fore.CYAN}{Style.BRIGHT}🔸 MENU CATEGORIAS 🔸{Style.RESET_ALL}")
+        print(f"{Fore.YELLOW}1. {Fore.MAGENTA}Cadastrar categoria")
+        print(f"{Fore.YELLOW}2. {Fore.MAGENTA}Listar categorias")
+        print(f"{Fore.YELLOW}3. {Fore.MAGENTA}Alterar categoria")
+        print(f"{Fore.YELLOW}4. {Fore.MAGENTA}Deletar categoria")
+        print(f"{Fore.RED}5. Voltar{Style.RESET_ALL}")
+      
         opcao = input("Opção: ")
         
         if opcao == "1":
@@ -823,13 +826,13 @@ def menu_categorias():
 
 def menu_usuarios():
     while True:
-        print("\n🔸 MENU USUÁRIOS 🔸")
-        print("1. Cadastrar usuário")
-        print("2. Listar usuários")
-        print("3. Alterar usuário")
-        print("4. Deletar usuário")
-        print("5. Voltar")
-       
+        print(f"\n{Fore.CYAN}{Style.BRIGHT}🔸 MENU USUÁRIOS 🔸{Style.RESET_ALL}")
+        print(f"{Fore.YELLOW}1. {Fore.MAGENTA}Cadastrar usuário")
+        print(f"{Fore.YELLOW}2. {Fore.MAGENTA}Listar usuários")
+        print(f"{Fore.YELLOW}3. {Fore.MAGENTA}Alterar usuário")
+        print(f"{Fore.YELLOW}4. {Fore.MAGENTA}Deletar usuário")
+        print(f"{Fore.RED}5. Voltar{Style.RESET_ALL}")
+
         opcao = input("Opção: ")
         
         if opcao == "1":
@@ -848,14 +851,14 @@ def menu_usuarios():
 
 def menu_movimentacoes():
     while True:
-        print("\n🔸 MENU MOVIMENTAÇÕES 🔸")
-        print("1. Registrar entrada de estoque")
-        print("2. Registrar saída de estoque")
-        print("3. Ajustar estoque manualmente")
-        print("4. Histórico completo")
-        print("5. Histórico por produto")
-        print("6. Voltar")
-        
+        print(f"\n{Fore.CYAN}{Style.BRIGHT}🔸 MENU MOVIMENTAÇÕES 🔸{Style.RESET_ALL}")
+        print(f"{Fore.YELLOW}1. {Fore.MAGENTA}Registrar entrada de estoque")
+        print(f"{Fore.YELLOW}2. {Fore.MAGENTA}Registrar saída de estoque")
+        print(f"{Fore.YELLOW}3. {Fore.MAGENTA}Ajustar estoque manualmente")
+        print(f"{Fore.YELLOW}4. {Fore.MAGENTA}Histórico completo")
+        print(f"{Fore.YELLOW}5. {Fore.MAGENTA}Histórico por produto")
+        print(f"{Fore.RED}6. Voltar{Style.RESET_ALL}")
+
         opcao = input("Opção: ")
         
         if opcao == "1":
@@ -886,14 +889,17 @@ def menu_movimentacoes():
         else:
             print(" Opção inválida!")
 
-def mostrar_menu(titulo, opcoes):
-    """Função genérica para exibir menus"""
-    print(f"\n🔸 {titulo} 🔸")
-    for i, (opcao, _) in enumerate(opcoes, 1):
-        print(f"{i}. {opcao}")
-    print(f"{len(opcoes)+1}. Voltar")
-    return input("Opção: ")
 
+
+def mostrar_menu(titulo, opcoes):
+    """Função genérica para exibir menus com cores"""
+    print(f"\n{Fore.BLUE}{Style.BRIGHT}🔸 {titulo.upper()} 🔸{Style.RESET_ALL}")
+    
+    for i, (opcao, _) in enumerate(opcoes, 1):
+        print(f"{Fore.YELLOW}{i}. {Fore.MAGENTA}{opcao}")
+    
+    print(f"{Fore.RED}{len(opcoes)+1}. Sair{Style.RESET_ALL}")
+    return input(f"\n{Fore.GREEN}▶ Opção: {Style.RESET_ALL}")
 def menu_principal():
     while True:
         opcoes = [
