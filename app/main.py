@@ -88,40 +88,107 @@ def listar_categorias():
         
 
 def cadastrar_produto():
-    print("\n=== 🔸  CADASTRO DE PRODUTO  🔸 ===")
-    listar_categorias()  
-    print("=======================================================")
-    print("📌 Escolha uma categoria acima para cadastrar o produto")
-    print("=======================================================")
+    print("\n=== 🔸 CADASTRO DE PRODUTO 🔸 ===")
+    print("(Digite '0' a qualquer momento para cancelar)\n")
+    
+    # Listar categorias
+    listar_categorias()
+    print("\n" + "="*50)
+    print("📌 Escolha uma categoria ou digite 0 para voltar")
+    print("="*50)
     
     try:
+        # ID da Categoria
+        categoria_id = input("\nID da Categoria: ").strip()
+        if categoria_id == '0':
+            print("\nOperação cancelada pelo usuário.")
+            return
+            
         dados = {
-            'categorias_id_categoria': int(input("ID da Categoria: ")),
-            'nome': input("Nome do produto: ").strip(),
-            'descricao': input("Descrição do produto: ").strip(),
-            'quantidade': max(0, int(input("Quantidade Inicial: "))),
-            'valor_unitario': max(0.0, float(input("Valor Unitário (R$): ")))
+            'categorias_id_categoria': int(categoria_id),
+            'nome': '',
+            'descricao': '',
+            'quantidade': 0,
+            'valor_unitario': 0.0
         }
         
+        # Nome do Produto
+        nome = input("Nome do produto (ou 0 para cancelar): ").strip()
+        if nome == '0':
+            print("\nOperação cancelada pelo usuário.")
+            return
+        dados['nome'] = nome
+        
+        # Descrição
+        descricao = input("Descrição do produto (ou 0 para cancelar): ").strip()
+        if descricao == '0':
+            print("\nOperação cancelada pelo usuário.")
+            return
+        dados['descricao'] = descricao
+        
+        # Quantidade
+        while True:
+            qtd = input("Quantidade Inicial (ou 0 para cancelar): ").strip()
+            if qtd == '0':
+                print("\nOperação cancelada pelo usuário.")
+                return
+            try:
+                dados['quantidade'] = max(0, int(qtd))
+                break
+            except ValueError:
+                print("Erro: Digite um número inteiro válido!")
+        
+        # Valor Unitário
+        while True:
+            valor = input("Valor Unitário (R$) (ou 0 para cancelar): ").strip()
+            if valor == '0':
+                print("\nOperação cancelada pelo usuário.")
+                return
+            try:
+                dados['valor_unitario'] = max(0.0, float(valor))
+                break
+            except ValueError:
+                print("Erro: Digite um valor decimal válido (ex: 99.90)!")
+        
+        # Confirmação final
+        print("\n" + "="*50)
+        print("CONFIRME OS DADOS DO PRODUTO:")
+        print(f"Categoria ID: {dados['categorias_id_categoria']}")
+        print(f"Nome: {dados['nome']}")
+        print(f"Descrição: {dados['descricao']}")
+        print(f"Quantidade: {dados['quantidade']}")
+        print(f"Valor Unitário: R$ {dados['valor_unitario']:.2f}")
+        print("="*50)
+        
+        confirmacao = input("\nConfirmar cadastro? (S/N): ").strip().upper()
+        if confirmacao != 'S':
+            print("\nCadastro cancelado!")
+            return
+        
+        # Salvar produto
         produto = Produto(**dados)
         if produto_id := produto.salvar():
-            print("\n=======================================")
-            print(" 🔸  PRODUTO CADASTRADO COM SUCESSO! 🔸  ")
-            print("=======================================")
+            print("\n" + "="*50)
+            print("🔸 PRODUTO CADASTRADO COM SUCESSO! 🔸")
+            print("="*50)
             print(f"ID: {produto_id}")
             print(f"Nome: {dados['nome']}")
-            print(f"Categoria ID: {dados['categorias_id_categoria']}")
             print(f"Estoque: {dados['quantidade']}")
             print(f"Valor Unitário: R$ {dados['valor_unitario']:.2f}")
-            print("=======================================")
+            print("="*50)
         else:
-            print("\n Falha ao cadastrar produto. Verifique os dados e tente novamente.")
+            print("\nFalha ao cadastrar produto. Verifique os dados e tente novamente.")
+            
     except ValueError as e:
-        print(f"\n Erro: {str(e)}")
+        print(f"\nErro: {str(e)}")
         print("Certifique-se de que:")
         print("- ID da Categoria é um número válido")
         print("- Quantidade é um número inteiro positivo")
         print("- Valor Unitário é um número decimal válido")
+    except Exception as e:
+        print(f"\nErro inesperado: {str(e)}")
+    finally:
+        input("\nPressione Enter para continuar...")
 
 
 def alterar_produto():
@@ -129,7 +196,7 @@ def alterar_produto():
     listar_produtos()
     
     try:
-        id_produto = int(input("\n▶ ID do Produto a alterar (0 para cancelar): "))
+        id_produto = int(input("\n ID do Produto a alterar (0 para cancelar): "))
         if id_produto == 0:
             return
             
@@ -143,17 +210,14 @@ def alterar_produto():
         print("\nDeixe em branco para manter o valor atual")
         novos_dados = {}
         
-    
         novo_nome = input(f"\n Nome [{produto['nome']}]: ").strip()
         if novo_nome:
             novos_dados['nome'] = novo_nome
-            
-  
+        
         nova_desc = input(f"▶ Descrição [{produto['descricao']}]: ").strip()
         if nova_desc:
             novos_dados['descricao'] = nova_desc
             
-   
         while True:
             novo_valor = input(f"▶ Valor Unitário [{produto['valor_unitario']}]: ").strip()
             if not novo_valor:
@@ -169,8 +233,7 @@ def alterar_produto():
             input("\nPressione Enter para continuar...")
             return
             
-       
-        print("\n=== RESUMO DA ALTERAÇÃO ===")
+        print("\n=== ALTERAÇÃO ===")
         print(f"ID do Produto: {id_produto}")
         for campo, valor in novos_dados.items():
             print(f"{campo.capitalize()}: {valor}")
@@ -181,7 +244,6 @@ def alterar_produto():
             print("\n Alteração cancelada!")
             input("\nPressione Enter para continuar...")
             return
-            
         
         if Produto.atualizar_produto(id_produto, novos_dados):
             print("\n Produto atualizado com sucesso!")
@@ -194,6 +256,7 @@ def alterar_produto():
         print(f"\n Erro inesperado: {str(e)}")
     finally:
         input("\nPressione Enter para continuar...")
+
 
 def deletar_produto():
     print("\n=== DELETAR PRODUTO ===")
@@ -364,6 +427,7 @@ def alterar_usuario():
     finally:
         input("\nPressione Enter para continuar...")
 
+
 def deletar_usuario():
     print("\n=== DELETAR USUÁRIO ===")
     listar_usuarios()
@@ -506,7 +570,7 @@ def registrar_movimentacao(tipo: str):
                 print("Operação cancelada!")
                 continue
             
-           
+        
             mov = Movimentacao(
                 tipo=tipo,
                 quantidade=quantidade,
@@ -713,11 +777,7 @@ def menu_produtos():
         print("2. Listar produtos")
         print("3. Alterar produto")
         print("4. Deletar produto")
-        print("5. Registrar entrada de estoque")
-        print("6. Registrar saída de estoque")
-        print("7. Ajustar estoque manualmente")
-        print("8. Histórico de movimentações")
-        print("9. Voltar")
+        print("5. Voltar")
         
         opcao = input("Opção: ")
         
@@ -730,17 +790,11 @@ def menu_produtos():
         elif opcao == "4":
             deletar_produto()
         elif opcao == "5":
-            registrar_movimentacao('entrada')
-        elif opcao == "6":
-            registrar_movimentacao('saida')
-        elif opcao == "7":
-            ajustar_estoque()
-        elif opcao == "8":
-            listar_movimentacoes()
-        elif opcao == "9":
+            
             break
         else:
             print("Opção inválida!")
+
 
 def menu_categorias():
     while True:
@@ -832,30 +886,36 @@ def menu_movimentacoes():
         else:
             print(" Opção inválida!")
 
+def mostrar_menu(titulo, opcoes):
+    """Função genérica para exibir menus"""
+    print(f"\n🔸 {titulo} 🔸")
+    for i, (opcao, _) in enumerate(opcoes, 1):
+        print(f"{i}. {opcao}")
+    print(f"{len(opcoes)+1}. Voltar")
+    return input("Opção: ")
+
 def menu_principal():
     while True:
-        print("\n🔸 MENU PRINCIPAL 🔸 ")
-        print("1. Gerenciar Produtos")
-        print("2. Gerenciar Categorias")
-        print("3. Gerenciar Usuários")
-        print("4. Gerenciar Movimentações")
-        print("5. Sair")
+        opcoes = [
+            ("Gerenciar PRODUTOS", menu_produtos),
+            ("Gerenciar CATEGORIAS", menu_categorias),
+            ("Gerenciar USUÁRIOS", menu_usuarios),
+            ("Gerenciar MOVIMENTAÇÕES", menu_movimentacoes)
+        ]
         
-        opcao = input("Opção: ")
+        opcao = mostrar_menu("MENU PRINCIPAL", opcoes)
         
-        if opcao == "1":
-            menu_produtos()
-        elif opcao == "2":
-            menu_categorias()
-        elif opcao == "3":
-            menu_usuarios()
-        elif opcao == "4":
-            menu_movimentacoes()
-        elif opcao == "5":
-            print("Saindo do sistema...")
-            break
-        else:
-            print(" Opção inválida!")
+        try:
+            if opcao == str(len(opcoes)+1):
+                print("\nSaindo do sistema...")
+                break
+            elif opcao.isdigit() and 0 < int(opcao) <= len(opcoes):
+                opcoes[int(opcao)-1][1]()  
+            else:
+                print("\n Opção inválida!")
+        except Exception as e:
+            print(f"\n Erro: {str(e)}")
+
 
 if __name__ == "__main__":
     if testar_conexao():
