@@ -122,3 +122,145 @@ class Usuario:
             if db.connection:
                 cursor.close()
             db.desconectar()
+
+    @staticmethod
+    def alterar(id_usuario: int, nome: str, email: str, nivel_de_acesso: str, senha: Optional[str] = None) -> bool:
+        """Altera os dados de um usuário existente"""
+        db = Database()
+        try:
+            if not db.conectar():
+                print("Erro: Não foi possível conectar ao banco de dados")
+                return False
+                
+            cursor = db.connection.cursor(dictionary=True)
+            
+           
+            if senha:
+                senha_hash = generate_password_hash(senha)
+                query = """
+                UPDATE usuarios 
+                SET nome = %s, email = %s, nivel_de_acesso = %s, senha = %s
+                WHERE id_usuario = %s AND status = 'S'
+                """
+                params = (nome, email, nivel_de_acesso, senha_hash, id_usuario)
+            else:
+                query = """
+                UPDATE usuarios 
+                SET nome = %s, email = %s, nivel_de_acesso = %s
+                WHERE id_usuario = %s AND status = 'S'
+                """
+                params = (nome, email, nivel_de_acesso, id_usuario)
+            
+            cursor.execute(query, params)
+            db.connection.commit()
+            return cursor.rowcount > 0
+            
+        except Exception as e:
+            print(f"Erro ao alterar usuário: {str(e)}")
+            if db.connection:
+                db.connection.rollback()
+            return False
+        finally:
+            if db.connection:
+                cursor.close()
+            db.desconectar()
+
+    @staticmethod
+    def deletar(id_usuario: int) -> bool:
+        """Marca um usuário como inativo (deleção lógica)"""
+        db = Database()
+        try:
+            if not db.conectar():
+                print("Erro: Não foi possível conectar ao banco de dados")
+                return False
+                
+            cursor = db.connection.cursor(dictionary=True)
+            query = """
+            UPDATE usuarios 
+            SET status = 'N'
+            WHERE id_usuario = %s AND status = 'S'
+            """
+            cursor.execute(query, (id_usuario,))
+            db.connection.commit()
+            return cursor.rowcount > 0
+            
+        except Exception as e:
+            print(f"Erro ao deletar usuário: {str(e)}")
+            if db.connection:
+                db.connection.rollback()
+            return False
+        finally:
+            if db.connection:
+                cursor.close()
+            db.desconectar()
+
+
+    @staticmethod
+    def alterar_usuario (id_usuario: int, nome: str, email: str, nivel_de_acesso: str, senha: Optional[str] = None) -> bool:
+        """Altera os dados de um usuário existente"""
+        db = Database()
+        try:
+            if not db.conectar():
+                print("Erro: Não foi possível conectar ao banco de dados")
+                return False
+                
+            cursor = db.connection.cursor(dictionary=True)
+            
+            if senha:
+                senha_hash = generate_password_hash(senha)
+                query = """
+                UPDATE usuarios 
+                SET nome = %s, email = %s, nivel_de_acesso = %s, senha = %s
+                WHERE id_usuario = %s AND status = 'S'
+                """
+                params = (nome, email, nivel_de_acesso, senha_hash, id_usuario)
+            else:
+                query = """
+                UPDATE usuarios 
+                SET nome = %s, email = %s, nivel_de_acesso = %s
+                WHERE id_usuario = %s AND status = 'S'
+                """
+                params = (nome, email, nivel_de_acesso, id_usuario)
+            
+            cursor.execute(query, params)
+            db.connection.commit()
+            return cursor.rowcount > 0
+            
+        except Exception as e:
+            print(f"Erro ao alterar usuário: {str(e)}")
+            if db.connection:
+                db.connection.rollback()
+            return False
+        finally:
+            if db.connection:
+                cursor.close()
+            db.desconectar()
+    
+    @staticmethod
+    def deletar_usuario (id_usuario: int) -> bool:
+        """Marca um usuário como inativo (deleção lógica)"""
+        db = Database()
+        try:
+            if not db.conectar():
+                print("Erro: Não foi possível conectar ao banco de dados")
+                return False
+                
+            cursor = db.connection.cursor(dictionary=True)
+            query = """
+            UPDATE usuarios 
+            SET status = 'N'
+            WHERE id_usuario = %s AND status = 'S'
+            """
+            cursor.execute(query, (id_usuario,))
+            db.connection.commit()
+            return cursor.rowcount > 0
+            
+        except Exception as e:
+            print(f"Erro ao deletar usuário: {str(e)}")
+            if db.connection:
+                db.connection.rollback()
+            return False
+        finally:
+            if db.connection:
+                cursor.close()
+            db.desconectar()

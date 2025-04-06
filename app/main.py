@@ -28,6 +28,54 @@ def cadastrar_categoria():
     else:
         print("Falha ao cadastrar categoria")
 
+def alterar_categoria():
+    print("\n=== ALTERAR CATEGORIA ===")
+    listar_categorias()
+    
+    try:
+        id_categoria = int(input("\nID da Categoria a alterar: "))
+        categoria = Categoria.listar_todas()
+        categoria = next((c for c in categoria if c['id_categoria'] == id_categoria), None)
+        
+        if not categoria:
+            print("Categoria não encontrada!")
+            return
+            
+        print("\nDeixe em branco para manter o valor atual")
+        novos_dados = {
+            'nome': input(f"Nome [{categoria['nome']}]: ") or categoria['nome'],
+            'descricao': input(f"Descrição [{categoria['descricao']}]: ") or categoria['descricao']
+        }
+        
+        if Categoria.atualizar_categoria(id_categoria, novos_dados):
+            print("\n Categoria atualizada com sucesso!")
+        else:
+            print("\n Falha ao atualizar categoria!")
+            
+    except ValueError:
+        print("ID deve ser um número!")
+    finally:
+        input("\nPressione Enter para continuar...")
+
+def deletar_categoria():
+    print("\n=== DELETAR CATEGORIA ===")
+    listar_categorias()
+    
+    try:
+        id_categoria = int(input("\nID da Categoria a deletar (0 para cancelar): "))
+        if id_categoria == 0:
+            return
+            
+        if Categoria.deletar_categoria(id_categoria):
+            print("\n Categoria deletada com sucesso!")
+        else:
+            print("\n Falha ao deletar categoria ou categoria em uso!")
+    except ValueError:
+        print("ID deve ser um número!")
+    finally:
+        input("\nPressione Enter para continuar...")
+
+
 def listar_categorias():
     print("\nLista de Categorias")
     if categorias := Categoria.listar_todas():
@@ -37,6 +85,7 @@ def listar_categorias():
             print(f"Descrição: {cat['descricao']}")
     else:
         print("Nenhuma categoria cadastrada")
+        
 
 def cadastrar_produto():
     print("\n=== 🔸  CADASTRO DE PRODUTO  🔸 ===")
@@ -74,6 +123,108 @@ def cadastrar_produto():
         print("- Quantidade é um número inteiro positivo")
         print("- Valor Unitário é um número decimal válido")
 
+
+def alterar_produto():
+    print("\n=== ALTERAR PRODUTO ===")
+    listar_produtos()
+    
+    try:
+        id_produto = int(input("\n▶ ID do Produto a alterar (0 para cancelar): "))
+        if id_produto == 0:
+            return
+            
+        produto = Produto.obter_por_id(id_produto)
+        
+        if not produto:
+            print("\n Produto não encontrado!")
+            input("\nPressione Enter para continuar...")
+            return
+            
+        print("\nDeixe em branco para manter o valor atual")
+        novos_dados = {}
+        
+    
+        novo_nome = input(f"\n Nome [{produto['nome']}]: ").strip()
+        if novo_nome:
+            novos_dados['nome'] = novo_nome
+            
+  
+        nova_desc = input(f"▶ Descrição [{produto['descricao']}]: ").strip()
+        if nova_desc:
+            novos_dados['descricao'] = nova_desc
+            
+   
+        while True:
+            novo_valor = input(f"▶ Valor Unitário [{produto['valor_unitario']}]: ").strip()
+            if not novo_valor:
+                break
+            try:
+                novos_dados['valor_unitario'] = float(novo_valor)
+                break
+            except ValueError:
+                print(" Valor inválido! Digite um número decimal (ex: 99.90)")
+                
+        if not novos_dados:
+            print("\n Nenhuma alteração foi realizada.")
+            input("\nPressione Enter para continuar...")
+            return
+            
+       
+        print("\n=== RESUMO DA ALTERAÇÃO ===")
+        print(f"ID do Produto: {id_produto}")
+        for campo, valor in novos_dados.items():
+            print(f"{campo.capitalize()}: {valor}")
+        print("==========================")
+        
+        confirmacao = input("\n Confirmar alteração? (S/N): ").strip().upper()
+        if confirmacao != 'S':
+            print("\n Alteração cancelada!")
+            input("\nPressione Enter para continuar...")
+            return
+            
+        
+        if Produto.atualizar_produto(id_produto, novos_dados):
+            print("\n Produto atualizado com sucesso!")
+        else:
+            print("\n Falha ao atualizar produto!")
+            
+    except ValueError:
+        print("\n Erro: ID deve ser um número inteiro!")
+    except Exception as e:
+        print(f"\n Erro inesperado: {str(e)}")
+    finally:
+        input("\nPressione Enter para continuar...")
+
+def deletar_produto():
+    print("\n=== DELETAR PRODUTO ===")
+    listar_produtos()
+    
+    try:
+        id_produto = int(input("\nID do Produto a deletar (0 para cancelar): "))
+        if id_produto == 0:
+            return
+            
+        produto = Produto.obter_por_id(id_produto)
+        if not produto:
+            print("Produto não encontrado!")
+            return
+            
+        print(f"\nVocê está prestes a deletar permanentemente:")
+        print(f"Produto: {produto['nome']}")
+        print(f"Estoque atual: {produto['quantidade']}")
+        
+        confirmacao = input("\nTem certeza? (S/N): ").strip().upper()
+        if confirmacao == 'S':
+            if Produto.deletar_produto(id_produto):
+                print("\n Produto deletado com sucesso!")
+            else:
+                print("\n Falha ao deletar produto!")
+    except ValueError:
+        print("ID deve ser um número!")
+    finally:
+        input("\nPressione Enter para continuar...")
+
+
 def listar_produtos():
     print("\n=== 🔸  LISTA DE PRODUTOS  🔸 ===")
     if produtos := Produto.listar_todos():
@@ -91,6 +242,7 @@ Data Cadastro: {p.get('data_cadastro', '').strftime('%d/%m/%Y %H:%M') if p.get('
     else:
         print("\nNenhum produto cadastrado no sistema")
         input("Pressione Enter para voltar...")
+
 
 def cadastrar_usuario():
     print("\n=== CADASTRO DE USUÁRIO ===")
@@ -127,7 +279,7 @@ def cadastrar_usuario():
         usuario = Usuario(**dados)
         if usuario_id := usuario.salvar():
             print("\n====================================")
-            print("✅ USUÁRIO CADASTRADO COM SUCESSO!")
+            print(" USUÁRIO CADASTRADO COM SUCESSO!")
             print("====================================")
             print(f"ID: {usuario_id}")
             print(f"Nome: {dados['nome']}")
@@ -154,18 +306,108 @@ Nível de Acesso: {u['nivel_de_acesso'].capitalize()}
     else:
         print("Nenhum usuário cadastrado")
         input("Pressione Enter para voltar...")
+
+
+def alterar_usuario():
+    print("\n=== ALTERAR USUÁRIO ===")
+    usuarios = Usuario.listar_todos()
+    for usuario in usuarios:
+        print(f"{usuario['id_usuario']}: {usuario['nome']} - {usuario['email']}")
+
+    try:
+        id_usuario = int(input("\nID do Usuário a alterar (0 para cancelar): "))
+        if id_usuario == 0:
+            return
+
+        usuario = Usuario.obter_por_id(id_usuario)
+        if not usuario:
+            print("Usuário não encontrado!")
+            return
+
+        print("\nDeixe em branco para manter o valor atual")
+        novo_nome = input(f"Nome [{usuario['nome']}]: ").strip() or usuario['nome']
+        novo_email = input(f"Email [{usuario['email']}]: ").strip() or usuario['email']
+        nova_senha = input("Nova senha (deixe em branco para não alterar): ").strip()
+        nivel = input(f"Nível de acesso [{usuario['nivel_de_acesso']}]: ").strip() or usuario['nivel_de_acesso']
+
+        print("\n=== RESUMO DA ALTERAÇÃO ===")
+        print(f"ID: {id_usuario}")
+        print(f"Nome: {novo_nome}")
+        print(f"Email: {novo_email}")
+        print(f"Nível de Acesso: {nivel}")
+        if nova_senha:
+            print("Senha: ****** (alterada)")
+        print("==========================")
+
+        confirmacao = input("Confirmar alteração? (S/N): ").strip().upper()
+        if confirmacao != 'S':
+            print("Alteração cancelada.")
+            return
+
+        sucesso = Usuario.alterar(
+            id_usuario=id_usuario,
+            nome=novo_nome,
+            email=novo_email,
+            nivel_de_acesso=nivel,
+            senha=nova_senha if nova_senha else None
+        )
+
+        if sucesso:
+            print("\nUsuário atualizado com sucesso!")
+        else:
+            print("\nFalha ao atualizar usuário!")
+
+    except ValueError:
+        print("ID deve ser um número!")
+    except Exception as e:
+        print(f"Erro inesperado: {str(e)}")
+    finally:
+        input("\nPressione Enter para continuar...")
+
+def deletar_usuario():
+    print("\n=== DELETAR USUÁRIO ===")
+    listar_usuarios()
+    
+    try:
+        id_usuario = int(input("\nID do Usuário a deletar (0 para cancelar): "))
+        if id_usuario == 0:
+            return
         
+        usuario = Usuario.obter_por_id(id_usuario)
+        if not usuario:
+            print("Usuário não encontrado!")
+            return
+        
+        print(f"\nVocê está prestes a deletar permanentemente:")
+        print(f"Nome: {usuario['nome']}")
+        print(f"Email: {usuario['email']}")
+        
+        confirmacao = input("\nTem certeza? (S/N): ").strip().upper()
+        if confirmacao == 'S':
+            if Usuario.deletar_usuario(id_usuario):
+                print("\n Usuário deletado com sucesso!")
+            else:
+                print("\n Falha ao deletar usuário!")
+        else:
+            print("\n Ação cancelada pelo usuário.")
+            
+    except ValueError:
+        print("ID deve ser um número!")
+    finally:
+        input("\nPressione Enter para continuar...")
+
+
 
 def registrar_movimentacao(tipo: str):
     tipo_nome = "ENTRADA" if tipo == "entrada" else "SAÍDA"
     
     while True:  
         print("\n" + "="*50)
-        print(f"📝 REGISTRAR {tipo_nome} DE ESTOQUE".center(50))
+        print(f" REGISTRAR {tipo_nome} DE ESTOQUE".center(50))
         print("="*50)
         
        
-        print("\n📦 LISTA DE PRODUTOS DISPONÍVEIS:")
+        print("\n LISTA DE PRODUTOS DISPONÍVEIS:")
         produtos = Produto.listar_todos()
         if not produtos:
             print(" Nenhum produto cadastrado!")
@@ -190,7 +432,7 @@ def registrar_movimentacao(tipo: str):
                 continue
                 
             print("\n" + "="*50)
-            print(f"🔍 PRODUTO SELECIONADO:")
+            print(f" PRODUTO SELECIONADO:")
             print(f"▪ Nome: {produto['nome']}")
             print(f"▪ Estoque Atual: {produto['quantidade']}")
             print(f"▪ Categoria: {produto.get('categoria_nome', 'N/A')}")
@@ -200,7 +442,7 @@ def registrar_movimentacao(tipo: str):
                 try:
                     quantidade = int(input("\n▶ Quantidade: "))
                     if quantidade <= 0:
-                        print("⚠️ A quantidade deve ser maior que zero!")
+                        print(" A quantidade deve ser maior que zero!")
                         continue
                         
                     if tipo == 'saida' and produto['quantidade'] < quantidade:
@@ -208,11 +450,11 @@ def registrar_movimentacao(tipo: str):
                         continue
                     break
                 except ValueError:
-                    print("⚠️ Digite um número válido!")
+                    print(" Digite um número válido!")
             
             if tipo == 'saida':
                 print("\n" + "="*50)
-                print(f"⚠️ CONFIRMAÇÃO DE SAÍDA")
+                print(f" CONFIRMAÇÃO DE SAÍDA")
                 print(f"▪ Produto: {produto['nome']}")
                 print(f"▪ Quantidade: {quantidade}")
                 print(f"▪ Estoque após saída: {produto['quantidade'] - quantidade}")
@@ -224,7 +466,7 @@ def registrar_movimentacao(tipo: str):
                     continue
             
             print("\n" + "="*50)
-            print("👤 SELECIONE O USUÁRIO RESPONSÁVEL:")
+            print(" SELECIONE O USUÁRIO RESPONSÁVEL:")
             usuarios = Usuario.listar_todos()
             if not usuarios:
                 print(" Nenhum usuário cadastrado!")
@@ -259,7 +501,7 @@ def registrar_movimentacao(tipo: str):
             print(f"▪ Motivo: {motivo}")
             print("="*50)
             
-            confirmacao_final = input("\n▶ Confirmar registro? (S/N): ").strip().upper()
+            confirmacao_final = input("\n Confirmar registro? (S/N): ").strip().upper()
             if confirmacao_final != 'S':
                 print("Operação cancelada!")
                 continue
@@ -277,7 +519,7 @@ def registrar_movimentacao(tipo: str):
                 produto_atualizado = Produto.obter_por_id(id_produto)
                 
                 print("\n" + "="*50)
-                print(f"✅ {tipo_nome} REGISTRADA COM SUCESSO!")
+                print(f" {tipo_nome} REGISTRADA COM SUCESSO!")
                 print("="*50)
                 print(f"▪ ID Movimentação: {id_movimentacao}")
                 print(f"▪ Produto: {produto['nome']}")
@@ -298,8 +540,6 @@ def registrar_movimentacao(tipo: str):
             continue
         
     input("\nPressione Enter para voltar ao menu...")
-
-
 
 
 def listar_movimentacoes():
@@ -443,7 +683,7 @@ def ajustar_estoque():
             produto_atualizado = Produto.obter_por_id(id_produto)
             
             print("\n" + "="*50)
-            print("✅ AJUSTE DE ESTOQUE REGISTRADO COM SUCESSO")
+            print(" AJUSTE DE ESTOQUE REGISTRADO COM SUCESSO")
             print("="*50)
             print(f"▪ ID Movimentação: {id_movimentacao}")
             print(f"▪ Produto: {produto['nome']} (ID: {id_produto})")
@@ -471,11 +711,13 @@ def menu_produtos():
         print("\n🔸 MENU PRODUTOS 🔸")
         print("1. Cadastrar produto")
         print("2. Listar produtos")
-        print("3. Registrar entrada de estoque")
-        print("4. Registrar saída de estoque")
-        print("5. Ajustar estoque manualmente")
-        print("6. Histórico de movimentações")
-        print("7. Voltar")
+        print("3. Alterar produto")
+        print("4. Deletar produto")
+        print("5. Registrar entrada de estoque")
+        print("6. Registrar saída de estoque")
+        print("7. Ajustar estoque manualmente")
+        print("8. Histórico de movimentações")
+        print("9. Voltar")
         
         opcao = input("Opção: ")
         
@@ -484,24 +726,30 @@ def menu_produtos():
         elif opcao == "2":
             listar_produtos()
         elif opcao == "3":
-            registrar_movimentacao('entrada')
+            alterar_produto()
         elif opcao == "4":
-            registrar_movimentacao('saida')
+            deletar_produto()
         elif opcao == "5":
-            ajustar_estoque()
+            registrar_movimentacao('entrada')
         elif opcao == "6":
-            listar_movimentacoes()
+            registrar_movimentacao('saida')
         elif opcao == "7":
+            ajustar_estoque()
+        elif opcao == "8":
+            listar_movimentacoes()
+        elif opcao == "9":
             break
         else:
-            print(" Opção inválida!")
+            print("Opção inválida!")
 
 def menu_categorias():
     while True:
         print("\n🔸 MENU CATEGORIAS 🔸")
         print("1. Cadastrar categoria")
         print("2. Listar categorias")
-        print("3. Voltar")
+        print("3. Alterar categoria")
+        print("4. Deletar categoria")
+        print("5. Voltar")
         
         opcao = input("Opção: ")
         
@@ -510,9 +758,13 @@ def menu_categorias():
         elif opcao == "2":
             listar_categorias()
         elif opcao == "3":
+            alterar_categoria()
+        elif opcao == "4":
+            deletar_categoria()
+        elif opcao == "5":
             break
         else:
-            print(" Opção inválida!")
+            print("Opção inválida!")
             
 
 def menu_usuarios():
@@ -520,8 +772,10 @@ def menu_usuarios():
         print("\n🔸 MENU USUÁRIOS 🔸")
         print("1. Cadastrar usuário")
         print("2. Listar usuários")
-        print("3. Voltar")
-        
+        print("3. Alterar usuário")
+        print("4. Deletar usuário")
+        print("5. Voltar")
+       
         opcao = input("Opção: ")
         
         if opcao == "1":
@@ -529,9 +783,14 @@ def menu_usuarios():
         elif opcao == "2":
             listar_usuarios()
         elif opcao == "3":
+            alterar_usuario()
+        elif opcao == "4":
+            deletar_usuario()
+        elif opcao == "5":
             break
         else:
             print(" Opção inválida!")
+
 
 def menu_movimentacoes():
     while True:

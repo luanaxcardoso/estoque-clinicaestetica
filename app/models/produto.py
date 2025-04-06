@@ -182,3 +182,84 @@ class Produto:
                 return False
             finally:
                 cursor.close()
+
+    @classmethod
+    def atualizar_produto(cls, id_produto: int, novos_dados: Dict[str, Union[str, int, float]]) -> bool:
+        """Atualiza os dados de um produto existente"""
+        with Database() as db:
+            if not db.connection or not db.connection.is_connected():
+                return False
+                
+            cursor = db.connection.cursor()
+            try:
+                
+                cursor.execute("SELECT 1 FROM produtos WHERE id_produto = %s", (id_produto,))
+                if not cursor.fetchone():
+                    print("Produto não encontrado!")
+                    return False
+                
+                
+                campos_permitidos = ['nome', 'descricao', 'valor_unitario', 'categorias_id_categoria']
+                dados_filtrados = {k: v for k, v in novos_dados.items() if k in campos_permitidos}
+                
+                if not dados_filtrados:
+                    print("Nenhum campo válido para atualização")
+                    return False
+                    
+                
+                set_clause = ", ".join([f"{k} = %s" for k in dados_filtrados.keys()])
+                valores = list(dados_filtrados.values())
+                valores.append(id_produto)
+                
+                query = f"UPDATE produtos SET {set_clause} WHERE id_produto = %s"
+                cursor.execute(query, valores)
+                db.connection.commit()
+                return cursor.rowcount > 0
+                
+            except mysql.connector.Error as err:
+                print(f"Erro ao atualizar produto: {err}")
+                db.connection.rollback()
+                return False
+            finally:
+                cursor.close()
+
+    @classmethod
+    def deletar_produto(cls, id_produto: int) -> bool:
+        """Remove um produto do sistema"""
+        with Database() as db:
+            if not db.connection or not db.connection.is_connected():
+                return False
+                
+            cursor = db.connection.cursor()
+            try:
+                
+                cursor.execute("SELECT 1 FROM produtos WHERE id_produto = %s", (id_produto,))
+                if not cursor.fetchone():
+                    print("Produto não encontrado!")
+                    return False
+                
+                
+                cursor.execute("""
+                    SELECT COUNT(*) FROM movimentacao
+                    WHERE produtos_id_produto = %s
+                """, (id_produto,))
+                
+                if cursor.fetchone()[0] > 0:
+                    print("Erro: Produto possui movimentações associadas")
+                    return False
+                
+            
+                cursor.execute("DELETE FROM produtos WHERE id_produto = %s", (id_produto,))
+                db.connection.commit()
+                
+                if cursor.rowcount > 0:
+                    print("Produto deletado com sucesso!")
+                    return True
+                return False
+                
+            except mysql.connector.Error as err:
+                print(f"Erro ao deletar produto: {err}")
+                db.connection.rollback()
+                return False
+            finally:
+                cursor.close()

@@ -25,17 +25,22 @@
 
 ----------------------------------------------------------------------------
 
-Sistema para gestão de estoque de uma clínica estética, utilizando Python e MySQL. O sistema é projetado para facilitar o gerenciamento, permitindo o cadastro e listagem de produtos, categorias,usuarios e movimentações de estoque.
+Sistema para gestão de estoque de uma clínica estética, utilizando Python e MySQL. O sistema é projetado para facilitar o gerenciamento de produtos, categorias,usuarios e movimentações de estoque.
 
 ## ✨ Funcionalidades
 
 - **Gestão de Produtos**
-  - Cadastro completo com estoque
+  - Cadastro de produtos
+  - Edição de produtos
+  - Busca e Listagem de produtos
+  - Exclusão de produtos
   - Associação a categorias
-  - Busca e listagem
+  
 
 - **Gestão de Categorias**
-  - Cadastro flexível
+  - Cadastro de categorias
+  - Edição de categorias
+  - Exclusão de categorias
   - Listagem de categorias
   - Hierarquia de produtos dentro de categorias
 
@@ -47,6 +52,9 @@ Sistema para gestão de estoque de uma clínica estética, utilizando Python e M
 - **Gestão de Usuários**
   - Cadastro de usuários
   - Listagem de usuários
+  - Edição de usuários
+  - Exclusão de usuários
+  - Hash de senhas
 
 
 ## 🛠️ Tecnologias
@@ -59,10 +67,11 @@ Sistema para gestão de estoque de uma clínica estética, utilizando Python e M
 - **Arquitetura**:
   - Programação Orientada a Objetos
 
-  - Bibliotecas listadas em requirements.txt
   
 ## 📂 Principais características:
 - **Navegação intuitiva** 
 - **Controle de fluxo** 
-- **Feedback visual no terminal** 
-- **Organização modular por funcionalidades**
+- **CRUD** 
+- **Organização por models**
+- **Conexão com o banco de dados**
+ 
