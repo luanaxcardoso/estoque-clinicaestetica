@@ -1,6 +1,6 @@
 from app.database import Database
 from typing import Optional, List, Dict, Literal
-import mysql.connector # type: ignore
+import mysql.connector  # type: ignore
 from datetime import datetime
 
 class Movimentacao:
@@ -20,8 +20,8 @@ class Movimentacao:
             id_usuario: ID do usuário que registrou a movimentação
             id_produto: ID do produto movimentado
         """
-        if quantidade <= 0:
-            raise ValueError("Quantidade deve ser maior que zero")
+        if not isinstance(quantidade, int) or quantidade <= 0:
+            raise ValueError("Quantidade deve ser um inteiro positivo")
             
         self.tipo = tipo
         self.quantidade = quantidade
@@ -32,7 +32,6 @@ class Movimentacao:
 
     def salvar(self) -> Optional[int]:
         """
-        Salva a movimentação no banco de dados e atualiza o estoque
         
         Returns:
             int: ID da movimentação criada ou None em caso de erro
@@ -47,30 +46,39 @@ class Movimentacao:
                 db.connection.start_transaction()
                 
                 
-                cursor.execute("SELECT id_usuario FROM usuarios WHERE id_usuario = %s", 
+                cursor.execute("SELECT 1 FROM usuarios WHERE id_usuario = %s", 
                             (self.id_usuario,))
                 if not cursor.fetchone():
-                    raise ValueError(f"Usuário com ID {self.id_usuario} não encontrado")
+                    raise ValueError(f"Usuário ID {self.id_usuario} não encontrado")
                 
                 
-                cursor.execute("SELECT id_produto FROM produtos WHERE id_produto = %s", 
+                cursor.execute("SELECT quantidade FROM produtos WHERE id_produto = %s", 
                             (self.id_produto,))
-                if not cursor.fetchone():
-                    raise ValueError(f"Produto com ID {self.id_produto} não encontrado")
+                produto = cursor.fetchone()
+                if not produto:
+                    raise ValueError(f"Produto ID {self.id_produto} não encontrado")
+                
+                estoque_atual = produto[0]
                 
                 
-                if self.tipo == 'saida':
-                    cursor.execute("SELECT quantidade FROM produtos WHERE id_produto = %s", 
-                                (self.id_produto,))
-                    estoque_atual = cursor.fetchone()[0]
-                    if estoque_atual < self.quantidade:
-                        raise ValueError(f"Estoque insuficiente. Disponível: {estoque_atual}")
+                if self.tipo == 'saida' and estoque_atual < self.quantidade:
+                    raise ValueError(
+                        f"Estoque insuficiente. Disponível: {estoque_atual}, "
+                        f"Tentativa de retirada: {self.quantidade}"
+                    )
+                
+                
+                if self.tipo == 'entrada':
+                    novo_estoque = self.quantidade  
+                else:
+                    novo_estoque = estoque_atual - self.quantidade
                 
                 
                 cursor.execute("""
-                    INSERT INTO movimentacao 
-                    (tipo, quantidade, motivo, data_movimentacao, usuarios_id_usuario, produtos_id_produto)
-                    VALUES (%s, %s, %s, %s, %s, %s)
+                    INSERT INTO movimentacao (
+                        tipo, quantidade, motivo, 
+                        data_movimentacao, usuarios_id_usuario, produtos_id_produto
+                    ) VALUES (%s, %s, %s, %s, %s, %s)
                 """, (
                     self.tipo,
                     self.quantidade,
@@ -83,13 +91,11 @@ class Movimentacao:
                 id_movimentacao = cursor.lastrowid
                 
                 
-                update_query = """
+                cursor.execute("""
                     UPDATE produtos 
-                    SET quantidade = quantidade {} %s 
+                    SET quantidade = %s 
                     WHERE id_produto = %s
-                """.format('+' if self.tipo == 'entrada' else '-')
-                
-                cursor.execute(update_query, (self.quantidade, self.id_produto))
+                """, (novo_estoque, self.id_produto))
                 
                 db.connection.commit()
                 return id_movimentacao
@@ -104,6 +110,7 @@ class Movimentacao:
                 return None
             finally:
                 cursor.close()
+
 
     @classmethod
     def listar_todas(cls) -> List[Dict]:
@@ -130,7 +137,7 @@ class Movimentacao:
                     JOIN usuarios u ON m.usuarios_id_usuario = u.id_usuario
                     JOIN produtos p ON m.produtos_id_produto = p.id_produto
                     JOIN categorias c ON p.categorias_id_categoria = c.id_categoria
-                    ORDER BY m.data_movimentacao DESC
+                    ORDER BY m.data_movimentacao ASC
                     """
                     cursor.execute(query)
                     return cursor.fetchall()
@@ -165,7 +172,7 @@ class Movimentacao:
                 JOIN usuarios u ON m.usuarios_id_usuario = u.id_usuario
                 JOIN produtos p ON m.produtos_id_produto = p.id_produto
                 WHERE m.produtos_id_produto = %s
-                ORDER BY m.data_movimentacao DESC
+                ORDER BY m.data_movimentacao ASC
                 """
                 cursor.execute(query, (id_produto,))
                 return cursor.fetchall()
