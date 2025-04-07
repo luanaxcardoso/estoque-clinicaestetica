@@ -1,4 +1,7 @@
 ## Projeto Integrado - UNIFEOB
+
+### Aluna: Luana Aparecida Cardoso, RA: 1012023100720
+
 ## 🚀 Sistema de Gerenciamento de Estoque de uma clínica estética
 
 ![Python](https://img.shields.io/badge/Python-3.8%2B-blue)
