@@ -78,35 +78,30 @@ class Produto:
                 cursor.close()
 
     @classmethod
-    def listar_todos(cls) -> List[Dict]:
-        """Lista todos os produtos com informações da categoria"""
+    def listar_todos(cls):
+        """Lista todos os produtos ordenados por data de cadastro """
         with Database() as db:
             if not db.connection or not db.connection.is_connected():
-                return []
+                return None
                 
             cursor = db.connection.cursor(dictionary=True)
             try:
                 cursor.execute("""
                     SELECT 
-                        p.id_produto,
-                        p.nome,
-                        p.descricao,
-                        p.quantidade,
-                        p.valor_unitario,
-                        p.data_cadastro,
-                        p.categorias_id_categoria,  
+                        p.*,
                         c.nome as categoria_nome
                     FROM produtos p
                     JOIN categorias c ON p.categorias_id_categoria = c.id_categoria
-                    ORDER BY p.nome
+                    ORDER BY p.data_cadastro ASC  
                 """)
                 return cursor.fetchall()
             except mysql.connector.Error as err:
                 print(f"Erro ao listar produtos: {err}")
-                return []
+                return None
             finally:
                 cursor.close()
 
+    
     @classmethod
     def obter_por_id(cls, id_produto: int) -> Optional[Dict]:
         """Obtém um produto específico pelo ID"""
@@ -130,6 +125,7 @@ class Produto:
                 return None
             finally:
                 cursor.close()
+                
     @classmethod
     def listar_por_categoria(cls, id_categoria: int) -> List[Dict]:
         """Lista todos os produtos de uma categoria específica"""

@@ -26,6 +26,10 @@
     ```
 4. Configure o banco de dados MySQL e crie as tabelas necessárias.
 
+5. Para executar o sistema, utilize o seguinte comando:
+    ```bash
+    python run.py
+    ```
 ----------------------------------------------------------------------------
 
 Sistema para gestão de estoque de uma clínica estética, utilizando Python e MySQL. O sistema é projetado para facilitar o gerenciamento de produtos, categorias,usuarios e movimentações de estoque.

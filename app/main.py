@@ -94,14 +94,13 @@ def cadastrar_produto():
     print("\n=== 🔸 CADASTRO DE PRODUTO 🔸 ===")
     print("(Digite '0' a qualquer momento para cancelar)\n")
     
-    # Listar categorias
     listar_categorias()
     print("\n" + "="*50)
     print("📌 Escolha uma categoria ou digite 0 para voltar")
     print("="*50)
     
     try:
-        # ID da Categoria
+        
         categoria_id = input("\nID da Categoria: ").strip()
         if categoria_id == '0':
             print("\nOperação cancelada pelo usuário.")
@@ -115,21 +114,20 @@ def cadastrar_produto():
             'valor_unitario': 0.0
         }
         
-        # Nome do Produto
+   
         nome = input("Nome do produto (ou 0 para cancelar): ").strip()
         if nome == '0':
             print("\nOperação cancelada pelo usuário.")
             return
         dados['nome'] = nome
         
-        # Descrição
+   
         descricao = input("Descrição do produto (ou 0 para cancelar): ").strip()
         if descricao == '0':
             print("\nOperação cancelada pelo usuário.")
             return
         dados['descricao'] = descricao
-        
-        # Quantidade
+     
         while True:
             qtd = input("Quantidade Inicial (ou 0 para cancelar): ").strip()
             if qtd == '0':
@@ -141,7 +139,6 @@ def cadastrar_produto():
             except ValueError:
                 print("Erro: Digite um número inteiro válido!")
         
-        # Valor Unitário
         while True:
             valor = input("Valor Unitário (R$) (ou 0 para cancelar): ").strip()
             if valor == '0':
@@ -153,7 +150,7 @@ def cadastrar_produto():
             except ValueError:
                 print("Erro: Digite um valor decimal válido (ex: 99.90)!")
         
-        # Confirmação final
+        
         print("\n" + "="*50)
         print("CONFIRME OS DADOS DO PRODUTO:")
         print(f"Categoria ID: {dados['categorias_id_categoria']}")
@@ -168,7 +165,7 @@ def cadastrar_produto():
             print("\nCadastro cancelado!")
             return
         
-        # Salvar produto
+      
         produto = Produto(**dados)
         if produto_id := produto.salvar():
             print("\n" + "="*50)
@@ -193,6 +190,24 @@ def cadastrar_produto():
     finally:
         input("\nPressione Enter para continuar...")
 
+def listar_produtos():
+    print(f"\n{Fore.CYAN}{Style.BRIGHT}=== 🔸  LISTA DE PRODUTOS  🔸 ==={Style.RESET_ALL}")
+    if produtos := Produto.listar_todos():  
+        for p in produtos:
+            print(f"""
+{Fore.YELLOW}ID: {Style.RESET_ALL}{p['id_produto']}
+{Fore.YELLOW}Nome: {Style.RESET_ALL}{p['nome']}
+{Fore.YELLOW}Descrição: {Style.RESET_ALL}{p['descricao']}
+{Fore.YELLOW}Categoria: {Style.RESET_ALL}{p['categoria_nome']} {Fore.YELLOW}(ID: {Style.RESET_ALL}{p['categorias_id_categoria']})
+{Fore.YELLOW}Estoque: {Style.RESET_ALL}{p['quantidade']}
+{Fore.YELLOW}Valor Unitário: {Fore.GREEN}R$ {float(p.get('valor_unitario', 0)):.2f}{Style.RESET_ALL}
+{Fore.YELLOW}Data Cadastro: {Style.RESET_ALL}{p.get('data_cadastro', '').strftime('%d/%m/%Y %H:%M') if p.get('data_cadastro') else 'N/A'}
+{Fore.BLUE}{'-'*40}{Style.RESET_ALL}""")
+    else:
+        print(f"\n{Fore.RED}Nenhum produto cadastrado no sistema{Style.RESET_ALL}")
+    
+    input(f"\n{Fore.CYAN}Pressione Enter para voltar...{Style.RESET_ALL}")
+        
 
 def alterar_produto():
     print("\n=== ALTERAR PRODUTO ===")
@@ -222,7 +237,7 @@ def alterar_produto():
             novos_dados['descricao'] = nova_desc
             
         while True:
-            novo_valor = input(f"▶ Valor Unitário [{produto['valor_unitario']}]: ").strip()
+            novo_valor = input(f" Valor Unitário [{produto['valor_unitario']}]: ").strip()
             if not novo_valor:
                 break
             try:
@@ -291,23 +306,7 @@ def deletar_produto():
         input("\nPressione Enter para continuar...")
 
 
-def listar_produtos():
-    print("\n=== 🔸  LISTA DE PRODUTOS  🔸 ===")
-    if produtos := Produto.listar_todos():
-        for p in produtos:
-            print(f"""
-ID: {p['id_produto']}
-Nome: {p['nome']}
-Descrição: {p['descricao']}
-Categoria: {p['categoria_nome']} (ID: {p['categorias_id_categoria']})
-Estoque: {p['quantidade']}
-Valor Unitário: R$ {float(p.get('valor_unitario', 0)):.2f}
-Data Cadastro: {p.get('data_cadastro', '').strftime('%d/%m/%Y %H:%M') if p.get('data_cadastro') else 'N/A'}
----------------------------------------""")
-        input("\nPressione Enter para voltar...")
-    else:
-        print("\nNenhum produto cadastrado no sistema")
-        input("Pressione Enter para voltar...")
+
 
 
 def cadastrar_usuario():
