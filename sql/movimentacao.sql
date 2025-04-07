@@ -3,7 +3,7 @@ SELECT * FROM clinica_estetica.movimentacao;
 -- Para mostrar a view ordenada pelo id
 SELECT * FROM view_movimentacoes_simples 
 ORDER BY id_movimentacao ASC  
-LIMIT 10;
+LIMIT 50;
 
 
 -- Para ver quais usuários fizeram movimentações
